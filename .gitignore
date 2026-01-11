@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# zips y builds locales
+*.zip
+.next
+node_modules
