@@ -10,12 +10,14 @@ type Estado = "confirmada" | "pendiente" | "cancelada";
 type Reserva = {
   id: string;
   cliente: string;
+  cliente_id: string;
   fecha: string;
   hora: string;
   personas: number;
   estado: Estado;
   telefono: string;
   restaurante_id: string;
+  fecha_hora_reserva: string;
   atendida: boolean | null;
 };
 
@@ -93,8 +95,10 @@ useEffect(() => {
       return {
         id: r.id,
         cliente: r.nombre_cliente ?? "Cliente",
+        cliente_id: r.cliente_id,
         telefono: r.telefono,
         restaurante_id: r.restaurante_id,
+        fecha_hora_reserva: r.fecha_hora_reserva,
         fecha:
           fechaDate.toDateString() === new Date().toDateString()
             ? "Hoy"
@@ -133,72 +137,82 @@ useEffect(() => {
     );
   };
 
-  /* ===== HA VENIDO ===== */
-  const marcarHaVenido = async (reserva: Reserva) => {
-    if (procesando === reserva.id || reserva.atendida === true) return;
-    setProcesando(reserva.id);
+/* ===== HA VENIDO ===== */
+const marcarHaVenido = async (reserva: Reserva) => {
+  if (procesando === reserva.id || reserva.atendida !== null) return;
 
-    const ahora = new Date().toISOString();
+  setProcesando(reserva.id);
 
-    const { data: lock } = await supabase
-      .from("reservas")
-      .update({ atendida: true })
-      .eq("id", reserva.id)
-      .is("atendida", null)
+  const { data, error } = await supabase
+    .from("reservas")
+    .update({ atendida: true })
+    .eq("id", reserva.id)
+    .is("atendida", null)
+    .select("id");
+
+  if (error || !data || data.length === 0) {
+    setProcesando(null);
+    return;
+  }
+
+  // 1️⃣ Buscar cliente real en tabla clientes
+  const { data: clienteExistente } = await supabase
+    .from("clientes")
+    .select("id")
+    .eq("restaurante_id", reserva.restaurante_id)
+    .eq("telefono", reserva.telefono)
+    .maybeSingle();
+
+  let clienteIdFinal = clienteExistente?.id;
+
+  // 2️⃣ Si no existe, crearlo
+  if (!clienteIdFinal) {
+    const { data: nuevoCliente, error: errNuevo } = await supabase
+      .from("clientes")
+      .insert({
+        restaurante_id: reserva.restaurante_id,
+        nombre: reserva.cliente,
+        telefono: reserva.telefono,
+        visitas_totales: 0,
+      })
       .select("id")
-      .maybeSingle();
+      .single();
 
-    if (!lock) {
+    if (errNuevo || !nuevoCliente) {
       setProcesando(null);
       return;
     }
 
-    const { data: cliente } = await supabase
-      .from("clientes")
-      .select("id")
-      .eq("telefono", reserva.telefono)
-      .eq("restaurante_id", reserva.restaurante_id)
-      .maybeSingle();
+    clienteIdFinal = nuevoCliente.id;
+  }
 
-    let clienteId = cliente?.id;
+  // 3️⃣ Guardar historial con el cliente_id correcto
+  const fechaEvento = new Date(reserva.fecha_hora_reserva);
 
-    if (!clienteId) {
-      const { data: nuevo } = await supabase
-        .from("clientes")
-        .insert({
-          restaurante_id: reserva.restaurante_id,
-          telefono: reserva.telefono,
-          nombre: reserva.cliente,
-          visitas_totales: 0,
-          primera_visita: ahora,
-          ultima_visita: ahora,
-        })
-        .select("id")
-        .single();
-
-      if (!nuevo) {
-        setProcesando(null);
-        return;
-      }
-
-      clienteId = nuevo.id;
-    }
-
-    await supabase.from("clientes_historial").insert({
-      cliente_id: clienteId,
-      tipo: "reserva",
-      descripcion: "Visita desde reserva",
-      personas: reserva.personas,
-    });
-
-    setReservas((prev) =>
-      prev.map((r) =>
-        r.id === reserva.id ? { ...r, atendida: true } : r
-      )
+  await supabase
+    .from("clientes_historial")
+    .upsert(
+      {
+        cliente_id: clienteIdFinal, // 👈 ESTE ES EL CAMBIO CLAVE
+        restaurante_id: reserva.restaurante_id,
+        reserva_id: reserva.id,
+        tipo: "visita",
+        personas: reserva.personas,
+        created_at: fechaEvento.toISOString(),
+      },
+      { onConflict: "reserva_id" }
     );
 
-    setProcesando(null);
-  };
+  // 4️⃣ Actualizar estado en el front
+  setReservas((prev) =>
+    prev.map((r) =>
+      r.id === reserva.id ? { ...r, atendida: true } : r
+    )
+  );
+
+  setProcesando(null);
+};
+
 
   /* ===== FILTROS ===== */
   const reservasFiltradas = reservas

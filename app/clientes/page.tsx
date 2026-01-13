@@ -21,9 +21,10 @@ type Cliente = {
 /* ===== HELPERS ===== */
 function getTipo(visitas: number) {
   if (visitas >= 5) return "Frecuente";
-  if (visitas === 1) return "Nuevo";
-  return "Habitual";
+  if (visitas >= 2) return "Habitual";
+  return "Nuevo";
 }
+
 
 function formatFecha(fecha: string | null) {
   if (!fecha) return "-";
@@ -115,6 +116,7 @@ const { data: existente } = await supabase
     if (existente) {
       await supabase.from("clientes_historial").insert({
         cliente_id: existente.id,
+        restaurante_id: restauranteId,
         tipo: "visita",
         created_at: fecha,
         personas: personas ? Number(personas) : null,
@@ -152,6 +154,7 @@ const { data: existente } = await supabase
 
     await supabase.from("clientes_historial").insert({
       cliente_id: cliente.id,
+      restaurante_id: restauranteId,
       tipo: "visita",
       created_at: fecha,
       personas: personas ? Number(personas) : null,

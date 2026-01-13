@@ -25,7 +25,7 @@ export default function ClienteHistorialPage() {
       .from("clientes_historial")
       .select("id, created_at")
       .eq("cliente_id", id)
-      .eq("tipo", "reserva") // ← CAMBIO CLAVE
+      .eq("tipo", "visita")
       .order("created_at", { ascending: false });
 
     if (data) setVisitas(data);

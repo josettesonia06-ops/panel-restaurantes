@@ -86,12 +86,14 @@ const ahoraEsp = new Date(
   }).format(new Date())
 );
 
+// Inicio y fin de hoy (España, estable)
+const ahora = new Date();
 
-// Inicio y fin de hoy (España → UTC)
-const inicioHoyDate = new Date(ahoraEsp);
+// España = UTC +1 / +2 → usamos el offset real del sistema
+const inicioHoyDate = new Date(ahora);
 inicioHoyDate.setHours(0, 0, 0, 0);
 
-const finHoyDate = new Date(ahoraEsp);
+const finHoyDate = new Date(ahora);
 finHoyDate.setHours(23, 59, 59, 999);
 
 const inicioHoy = inicioHoyDate.toISOString();
