@@ -4,8 +4,8 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
-      <body>{children}</body>
-    </html>
+    <div style={{ minHeight: "100vh" }}>
+      {children}
+    </div>
   );
 }
