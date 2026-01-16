@@ -12,21 +12,28 @@ export default function AcceptInvitePage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
+useEffect(() => {
+  const processInvite = async () => {
+    const { data, error } = await supabase.auth.getSession();
 
-      if (!data.session) {
+    // 👇 si no hay sesión, intenta crearla desde el hash
+    if (!data.session) {
+      const { error: exchangeError } =
+        await supabase.auth.exchangeCodeForSession(window.location.href);
+
+      if (exchangeError) {
         setError("Invitación no válida o expirada.");
         setLoading(false);
         return;
       }
+    }
 
-      setLoading(false);
-    };
+    setLoading(false);
+  };
 
-    checkSession();
-  }, []);
+  processInvite();
+}, []);
+
 
   const guardarPassword = async () => {
     setError("");
