@@ -13,10 +13,11 @@ export default function AcceptInvitePage() {
   const [loading, setLoading] = useState(true);
 
 useEffect(() => {
-  const checkSession = async () => {
-    const { data } = await supabase.auth.getSession();
+  const processInvite = async () => {
+    const { error } =
+      await supabase.auth.exchangeCodeForSession(window.location.href);
 
-    if (!data.session) {
+    if (error) {
       setError("Invitación no válida o expirada.");
       setLoading(false);
       return;
@@ -25,8 +26,10 @@ useEffect(() => {
     setLoading(false);
   };
 
-  checkSession();
+  processInvite();
 }, []);
+
+
 
 
   const guardarPassword = async () => {
@@ -51,7 +54,8 @@ useEffect(() => {
       return;
     }
 
-    router.push("/dashboard");
+    router.replace("/dashboard");
+
   };
 
   if (loading) {
