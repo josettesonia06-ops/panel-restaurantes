@@ -13,25 +13,19 @@ export default function AcceptInvitePage() {
   const [loading, setLoading] = useState(true);
 
 useEffect(() => {
-  const processInvite = async () => {
-    const { data, error } = await supabase.auth.getSession();
+  const checkSession = async () => {
+    const { data } = await supabase.auth.getSession();
 
-    // 👇 si no hay sesión, intenta crearla desde el hash
     if (!data.session) {
-      const { error: exchangeError } =
-        await supabase.auth.exchangeCodeForSession(window.location.href);
-
-      if (exchangeError) {
-        setError("Invitación no válida o expirada.");
-        setLoading(false);
-        return;
-      }
+      setError("Invitación no válida o expirada.");
+      setLoading(false);
+      return;
     }
 
     setLoading(false);
   };
 
-  processInvite();
+  checkSession();
 }, []);
 
 
@@ -48,13 +42,9 @@ useEffect(() => {
       return;
     }
 
-const { error } = await supabase.auth.updateUser({
-  password,
-  data: {
-    password_set: true,
-  },
-});
-
+    const { error } = await supabase.auth.updateUser({
+      password,
+    });
 
     if (error) {
       setError(error.message);
@@ -65,11 +55,7 @@ const { error } = await supabase.auth.updateUser({
   };
 
   if (loading) {
-    return (
-      <div style={{ padding: 40 }}>
-        <p>Cargando invitación…</p>
-      </div>
-    );
+    return <p style={{ padding: 40 }}>Cargando invitación…</p>;
   }
 
   return (
@@ -78,26 +64,26 @@ const { error } = await supabase.auth.updateUser({
         <h1 className="text-xl font-bold text-center">Activar cuenta</h1>
 
         <input
-          className="input"
           type="password"
           placeholder="Nueva contraseña"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="input"
         />
 
         <input
-          className="input"
           type="password"
           placeholder="Repite la contraseña"
           value={password2}
           onChange={(e) => setPassword2(e.target.value)}
+          className="input"
         />
 
         {error && (
           <p className="text-red-500 text-sm text-center">{error}</p>
         )}
 
-        <button className="btn w-full" onClick={guardarPassword}>
+        <button onClick={guardarPassword} className="btn w-full">
           Activar cuenta
         </button>
       </div>
