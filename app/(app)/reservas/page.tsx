@@ -14,11 +14,16 @@ type Reserva = {
   fecha: string;
   hora: string;
   personas: number;
+  email: string;
   estado: Estado;
   telefono: string;
   restaurante_id: string;
   fecha_hora_reserva: string;
   atendida: boolean | null;
+  resena_solicitada: boolean;
+  ya_dejo_resena: boolean;
+
+  
 };
 
 type Filtro = "todas" | "hoy" | "pendientes";
@@ -83,7 +88,13 @@ useEffect(() => {
 
     const { data } = await supabase
       .from("reservas")
-      .select("*")
+      .select(`
+  *,
+  clientes:cliente_id (
+    ya_dejo_resena
+  )
+`)
+
       .eq("restaurante_id", restauranteId)
       .order("fecha_hora_reserva", { ascending: true });
 
@@ -97,6 +108,7 @@ useEffect(() => {
         cliente: r.nombre_cliente ?? "Cliente",
         cliente_id: r.cliente_id,
         telefono: r.telefono,
+        email: r.email,
         restaurante_id: r.restaurante_id,
         fecha_hora_reserva: r.fecha_hora_reserva,
         fecha:
@@ -110,6 +122,10 @@ useEffect(() => {
         personas: r.personas,
         estado: r.estado,
         atendida: r.atendida,
+        resena_solicitada: r.resena_solicitada,
+        ya_dejo_resena: r.clientes?.ya_dejo_resena ?? false,
+
+
       };
     });
 
@@ -120,42 +136,85 @@ useEffect(() => {
     if (restauranteId) cargarReservas();
   }, [restauranteId]);
 
-  /* ===== CAMBIAR ESTADO ===== */
-  const actualizarEstado = async (id: string, nuevoEstado: Estado) => {
-    if (!restauranteId) return;
+/* ===== CAMBIAR ESTADO ===== */
+const actualizarEstado = async (id: string, nuevoEstado: Estado) => {
+  if (!restauranteId) return;
 
-    await supabase
-      .from("reservas")
-      .update({ estado: nuevoEstado })
-      .eq("id", id)
-      .eq("restaurante_id", restauranteId);
-
-    setReservas((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, estado: nuevoEstado } : r
-      )
-    );
-  };
-
-/* ===== HA VENIDO ===== */
-const marcarHaVenido = async (reserva: Reserva) => {
-  if (procesando === reserva.id || reserva.atendida !== null) return;
-
-  setProcesando(reserva.id);
-
-  const { data, error } = await supabase
+  // 1. Update en Supabase (lo que ya funcionaba)
+  const { error } = await supabase
     .from("reservas")
-    .update({ atendida: true })
-    .eq("id", reserva.id)
-    .is("atendida", null)
-    .select("id");
+    .update({ estado: nuevoEstado })
+    .eq("id", id)
+    .eq("restaurante_id", restauranteId);
 
-  if (error || !data || data.length === 0) {
-    setProcesando(null);
+  if (error) {
+    console.error("Error al actualizar estado", error);
     return;
   }
 
-  // 1️⃣ Buscar cliente real en tabla clientes
+  // 2. Update en el estado local (lo que ya funcionaba)
+  setReservas((prev) =>
+    prev.map((r) =>
+      r.id === id ? { ...r, estado: nuevoEstado } : r
+    )
+  );
+
+  // 3. Avisar a n8n (NO crítico, NO rompe nada)
+  try {
+    await fetch("https://n8n.gastrohelp.es/webhook/reserva-estado-cambiado", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        reserva_id: id,
+        estado: nuevoEstado, // "confirmada" | "cancelada"
+        restaurante_id: restauranteId,
+      }),
+    });
+  } catch (e) {
+    console.log("Webhook n8n no respondió, pero el estado se actualizó");
+  }
+};
+
+/* ===== HA VENIDO ===== */
+const marcarHaVenido = async (reserva: Reserva, valor: boolean) => {
+
+  if (procesando === reserva.id || reserva.atendida !== null) return;
+
+const { data, error } = await supabase
+  .from("reservas")
+  .update({ atendida: valor })
+  .eq("id", reserva.id)
+  .eq("restaurante_id", restauranteId)
+  .select("id");
+
+if (error) {
+  console.error("Error real al marcar ha venido:", error);
+  setProcesando(null);
+  return;
+}
+
+// 👇 CLAVE: si no hay filas, NO es error
+if (!data || data.length === 0) {
+  console.warn("Reserva ya estaba atendida o no había cambios");
+}
+
+
+
+  
+// ⛔ Si NO ha venido, paramos aquí
+if (valor === false) {
+  setReservas((prev) =>
+    prev.map((r) =>
+      r.id === reserva.id ? { ...r, atendida: false } : r
+    )
+  );
+  setProcesando(null);
+  return;
+}
+
+  // 1⃣ Buscar cliente real en tabla clientes
   const { data: clienteExistente } = await supabase
     .from("clientes")
     .select("id")
@@ -165,7 +224,7 @@ const marcarHaVenido = async (reserva: Reserva) => {
 
   let clienteIdFinal = clienteExistente?.id;
 
-  // 2️⃣ Si no existe, crearlo
+  // 2⃣ Si no existe, crearlo
   if (!clienteIdFinal) {
     const { data: nuevoCliente, error: errNuevo } = await supabase
       .from("clientes")
@@ -186,7 +245,7 @@ const marcarHaVenido = async (reserva: Reserva) => {
     clienteIdFinal = nuevoCliente.id;
   }
 
-  // 3️⃣ Guardar historial con el cliente_id correcto
+  // 3⃣ Guardar historial con el cliente_id correcto
   const fechaEvento = new Date(reserva.fecha_hora_reserva);
 
   await supabase
@@ -203,12 +262,30 @@ const marcarHaVenido = async (reserva: Reserva) => {
       { onConflict: "reserva_id" }
     );
 
-  // 4️⃣ Actualizar estado en el front
+  // 4⃣ Actualizar estado en el front
   setReservas((prev) =>
     prev.map((r) =>
       r.id === reserva.id ? { ...r, atendida: true } : r
     )
   );
+// 5⃣ Avisar a n8n para pedir reseña (solo si ha venido)
+fetch("https://n8n.gastrohelp.es/webhook/resena-email", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    reserva_id: reserva.id,
+    restaurante_id: reserva.restaurante_id,
+    cliente_id: clienteIdFinal,
+    email: reserva.email,
+    nombre: reserva.cliente,
+    telefono: reserva.telefono,
+    resena_solicitada: reserva.resena_solicitada,
+    ya_dejo_resena: reserva.ya_dejo_resena,
+
+  }),
+});
 
   setProcesando(null);
 };
@@ -295,21 +372,41 @@ const marcarHaVenido = async (reserva: Reserva) => {
                 </td>
 
                 <td className="px-6 py-4">
-                  {r.atendida === null && r.estado !== "cancelada" && (
-                    <button
-                      disabled={procesando === r.id}
-                      onClick={() => marcarHaVenido(r)}
-                      className="w-7 h-7 flex items-center justify-center rounded border border-green-600 text-green-600 disabled:opacity-40"
-                    >
-                      ✓
-                    </button>
-                  )}
+{r.atendida === null && r.estado === "confirmada" && (
+  <div className="flex gap-2">
+    <button
+      disabled={procesando === r.id}
+      onClick={() => marcarHaVenido(r, true)}
+      className="w-7 h-7 flex items-center justify-center rounded border border-green-600 text-green-600"
+      title="Ha venido"
+    >
+      ✓
+    </button>
+
+    <button
+      disabled={procesando === r.id}
+      onClick={() => marcarHaVenido(r, false)}
+      className="w-7 h-7 flex items-center justify-center rounded border border-red-600 text-red-600"
+      title="No ha venido"
+    >
+      ✕
+    </button>
+  </div>
+)}
+
 
                   {r.atendida === true && (
                     <span className="text-xs px-2 py-1 rounded-full bg-green-500/15 text-green-600">
                       Ha venido
                     </span>
+                    
                   )}
+                  {r.atendida === false && (
+  <span className="text-xs px-2 py-1 rounded-full bg-red-500/15 text-red-600">
+    No ha venido
+  </span>
+)}
+
                 </td>
               </tr>
             ))}

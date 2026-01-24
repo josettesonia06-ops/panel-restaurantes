@@ -49,6 +49,22 @@ export default function ClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [restauranteId, setRestauranteId] = useState<string | null>(null);
+    const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const read = () =>
+      setIsDark(document.documentElement.classList.contains("dark"));
+    read();
+
+    const obs = new MutationObserver(read);
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => obs.disconnect();
+  }, []);
+
 useEffect(() => {
   const cargarRestaurante = async () => {
     const id = await getRestauranteUsuario();
@@ -267,47 +283,77 @@ const { data: existente } = await supabase
       </div>
 
       {/* MODAL AÑADIR CLIENTE */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-[#050b18] rounded-xl p-6 w-full max-w-md space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="font-bold text-lg">Añadir cliente</h2>
-              <button onClick={() => setShowModal(false)}>
-                <X />
-              </button>
-            </div>
+ {showModal && (
+  <div
+    className={`fixed inset-0 z-50 flex items-center justify-center ${
+      isDark ? "bg-black/60" : "bg-black/30"
+    }`}
+  >
+    <div
+      className={`rounded-xl p-6 w-full max-w-md space-y-4 ${
+        isDark
+          ? "bg-[#0b1220] text-gray-100"
+          : "bg-white text-gray-900"
+      }`}
+    >
+      <div className="flex justify-between items-center">
+        <h2 className="font-bold text-lg">Añadir cliente</h2>
+        <button
+          onClick={() => setShowModal(false)}
+          className="opacity-70 hover:opacity-100"
+        >
+          <X />
+        </button>
+      </div>
 
-            <input
-              className="w-full border rounded-lg p-2 text-sm"
-              placeholder="Nombre del cliente"
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-            />
+      <input
+        className={`w-full border rounded-lg p-2 text-sm ${
+          isDark
+            ? "bg-[#050b18] text-gray-100 border-gray-700"
+            : "bg-white text-gray-900 border-gray-300"
+        }`}
+        placeholder="Nombre del cliente"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+      />
 
-            <input
-              type="date"
-              className="w-full border rounded-lg p-2 text-sm"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-            />
+      <input
+        type="date"
+        className={`w-full border rounded-lg p-2 text-sm ${
+          isDark
+            ? "bg-[#050b18] text-gray-100 border-gray-700"
+            : "bg-white text-gray-900 border-gray-300"
+        }`}
+        value={fecha}
+        onChange={(e) => setFecha(e.target.value)}
+      />
 
-            <input
-              type="number"
-              className="w-full border rounded-lg p-2 text-sm"
-              placeholder="Personas (opcional)"
-              value={personas}
-              onChange={(e) => setPersonas(e.target.value)}
-            />
+      <input
+        type="number"
+        className={`w-full border rounded-lg p-2 text-sm ${
+          isDark
+            ? "bg-[#050b18] text-gray-100 border-gray-700"
+            : "bg-white text-gray-900 border-gray-300"
+        }`}
+        placeholder="Personas (opcional)"
+        value={personas}
+        onChange={(e) => setPersonas(e.target.value)}
+      />
 
-            <button
-              onClick={añadirCliente}
-              className="w-full py-2 rounded-lg border font-bold"
-            >
-              Guardar cliente
-            </button>
-          </div>
-        </div>
-      )}
+      <button
+        onClick={añadirCliente}
+        className={`w-full py-2 rounded-lg font-bold text-white ${
+        isDark
+          ? "bg-black hover:bg-gray-800"
+          : "bg-gray-900 hover:bg-gray-800"
+      }`}
+      >
+        Guardar cliente
+      </button>
+    </div>
+  </div>
+)}
+
 
       {/* MODAL AÑADIR VISITA */}
       {showAddVisita && clienteSeleccionado && (

@@ -178,13 +178,14 @@ useEffect(() => {
               key={item.href}
               href={item.href}
               onClick={onNavigate}
-              className={[
-                "flex items-center justify-between px-3 py-2 rounded-md transition",
-                "text-gray-700 dark:text-gray-200",
-                isActive
-                  ? "bg-gray-100 dark:bg-gray-800 font-semibold"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-900",
-              ].join(" ")}
+             className={[
+  "flex items-center justify-between px-3 py-2 rounded-md transition",
+  isActive
+  ? "bg-white border border-gray-200 text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 font-semibold"
+  : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-900"
+
+].join(" ")}
+
             >
               <div className="flex items-center gap-3">
                 <Icon size={18} />

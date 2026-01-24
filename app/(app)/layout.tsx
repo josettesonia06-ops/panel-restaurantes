@@ -18,8 +18,6 @@ export default function RootLayout({
   const isLogin = pathname === "/login";
 
   return (
-    <html lang="es" suppressHydrationWarning>
-      <body className="min-h-screen transition-colors">
         <ThemeProvider>
           {isLogin ? (
             /* ===== SOLO LOGIN ===== */
@@ -77,8 +75,13 @@ export default function RootLayout({
               </div>
             </RequireLandscape>
           )}
-        </ThemeProvider>
-      </body>
-    </html>
+<div className="mt-16 py-6 flex justify-center">
+  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+    © {new Date().getFullYear()} GastroHelp®
+  </span>
+</div>
+
+
+     </ThemeProvider>
   );
 }

@@ -62,8 +62,8 @@ useEffect(() => {
       .eq("id", restauranteId)
       .single();
 
-    console.log("REST DATA:", data);
-    console.log("REST ERROR:", error);
+   // console.log("REST DATA:", data);
+   // console.log("REST ERROR:", error);
 
     if (data) setRestaurante(data);
   };
@@ -381,6 +381,7 @@ if (diaFlojo) {
   };
 
   return (
+    
     <div className="space-y-6">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
