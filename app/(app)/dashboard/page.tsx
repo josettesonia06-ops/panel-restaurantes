@@ -165,7 +165,8 @@ const cargarResenasPendientes = async () => {
     .from("resenas")
     .select("*", { count: "exact", head: true })
     .eq("restaurante_id", restaurante.id)
-    .eq("respondida", false);
+    .eq("responded", false);
+
 
   if (count !== null) setResenasPendientes(count);
 };
