@@ -9,6 +9,7 @@ import {
   Users,
   MessageSquare,
   Settings,
+  Gift,
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
 
@@ -146,6 +147,12 @@ useEffect(() => {
       icon: MessageSquare,
       badge: resenasPendientes,
     },
+        {
+      href: "/dashboard/fidelizacion/cupones",
+      label: "Fidelización",
+      icon: Gift,
+    },
+
     { href: "/ajustes", label: "Ajustes", icon: Settings },
   ];
 

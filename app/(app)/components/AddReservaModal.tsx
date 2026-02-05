@@ -78,21 +78,41 @@ export default function AddReservaModal({
       return;
     }
 
-    const { error: errorReserva } = await supabase.from("reservas").insert({
-      restaurante_id: restauranteId,
-      cliente_id: clienteId,
-      nombre_cliente: nombre,
-      telefono,
-      personas: Number(personas),
-      fecha_hora_reserva: fechaHoraDate.toISOString(),
-      estado: "pendiente",
-      origen: "panel",
-    });
+const { data: reservaCreada, error: errorReserva } = await supabase
+  .from("reservas")
+  .insert({
+    restaurante_id: restauranteId,
+    cliente_id: clienteId,
+    nombre_cliente: nombre,
+    telefono,
+    personas: Number(personas),
+    fecha_hora_reserva: fechaHoraDate.toISOString(),
+    estado: "pendiente",
+    origen: "panel",
+  })
+  .select("id, restaurante_id")
+  .single();
 
-    if (errorReserva) {
-      setLoading(false);
-      return;
-    }
+
+if (errorReserva || !reservaCreada) {
+  setLoading(false);
+  return;
+}
+
+try {
+  await fetch("https://n8n.gastrohelp.es/webhook/panel-reserva-creada", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      reserva_id: reservaCreada.id,
+      restaurante_id: reservaCreada.restaurante_id,
+      origen: "panel",
+    }),
+  });
+} catch {
+  console.log("No se pudo notificar a n8n (panel-reserva-creada)");
+}
+
 
     setNombre("");
     setTelefono("");

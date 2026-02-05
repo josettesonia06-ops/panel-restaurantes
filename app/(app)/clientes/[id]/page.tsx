@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "../../lib/supabaseClient";
 import AddVisitaModal from "../../components/AddVisitaModal";
@@ -16,8 +16,9 @@ export default function ClienteHistorialPage() {
   const [visitas, setVisitas] = useState<Visita[]>([]);
   const [loading, setLoading] = useState(true);
 
-  /* NUEVO: modal visita */
   const [showAddVisita, setShowAddVisita] = useState(false);
+
+  const totalVisitas = useMemo(() => visitas.length, [visitas]);
 
   /* ===== CARGAR VISITAS ===== */
   const cargarVisitas = async () => {
@@ -44,15 +45,13 @@ export default function ClienteHistorialPage() {
           <h1 className="text-2xl font-extrabold uppercase tracking-wider">
             Historial del cliente
           </h1>
-          <p className="text-sm opacity-70">
-            Visitas presenciales
-          </p>
+          <p className="text-sm opacity-70">Visitas presenciales</p>
+          <p className="text-xs opacity-70 mt-1">Total visitas: {totalVisitas}</p>
         </div>
 
         <button
           onClick={() => setShowAddVisita(true)}
-          className="px-4 py-2 rounded-lg text-sm font-bold border
-          hover:bg-gray-100 dark:hover:bg-gray-800"
+          className="px-4 py-2 rounded-lg text-sm font-bold border hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           Añadir visita
         </button>
@@ -60,16 +59,10 @@ export default function ClienteHistorialPage() {
 
       {/* LISTADO VISITAS */}
       <div className="card rounded-2xl p-5 space-y-3">
-        {loading && (
-          <p className="text-sm opacity-70">
-            Cargando visitas…
-          </p>
-        )}
+        {loading && <p className="text-sm opacity-70">Cargando visitas…</p>}
 
         {!loading && visitas.length === 0 && (
-          <p className="text-sm opacity-70">
-            No hay visitas registradas
-          </p>
+          <p className="text-sm opacity-70">No hay visitas registradas</p>
         )}
 
         {!loading &&
@@ -92,7 +85,9 @@ export default function ClienteHistorialPage() {
         <AddVisitaModal
           clienteId={id}
           onClose={() => setShowAddVisita(false)}
-          onSaved={cargarVisitas}
+          onSaved={async () => {
+            await cargarVisitas();
+          }}
         />
       )}
     </div>
