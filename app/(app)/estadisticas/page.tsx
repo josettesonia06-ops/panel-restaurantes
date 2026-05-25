@@ -18,6 +18,10 @@ import {
   ArrowDownRight,
   ShoppingCart,
   Euro,
+  Activity,
+  PieChart as PieIcon,
+  Target,
+  Trophy,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -120,22 +124,23 @@ function toNum(v: unknown) {
   return Number.isFinite(n) ? n : 0;
 }
 
+function formatLocalDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 function getMonthStart(date = new Date()): string {
-  return new Date(date.getFullYear(), date.getMonth(), 1)
-    .toISOString()
-    .split("T")[0];
+  return formatLocalDate(new Date(date.getFullYear(), date.getMonth(), 1));
 }
 
 function getNextMonthStart(date = new Date()): string {
-  return new Date(date.getFullYear(), date.getMonth() + 1, 1)
-    .toISOString()
-    .split("T")[0];
+  return formatLocalDate(new Date(date.getFullYear(), date.getMonth() + 1, 1));
 }
 
 function getPrevMonthStart(date = new Date()): string {
-  return new Date(date.getFullYear(), date.getMonth() - 1, 1)
-    .toISOString()
-    .split("T")[0];
+  return formatLocalDate(new Date(date.getFullYear(), date.getMonth() - 1, 1));
 }
 
 function metricDelta(actual: number, anterior: number) {
@@ -164,18 +169,18 @@ function TrendBadge({
   return (
     <div
       className={clsx(
-        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
+        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold",
         sube
           ? dark
-            ? "bg-emerald-500/20 text-emerald-200"
-            : "bg-emerald-100 text-emerald-700"
+            ? "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/20"
+            : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
           : baja
           ? dark
-            ? "bg-red-500/20 text-red-200"
-            : "bg-red-100 text-red-700"
+            ? "bg-red-500/15 text-red-200 ring-1 ring-red-500/20"
+            : "bg-red-50 text-red-700 ring-1 ring-red-200"
           : dark
-          ? "bg-gray-700 text-gray-200"
-          : "bg-gray-100 text-gray-700"
+          ? "bg-gray-800 text-gray-200 ring-1 ring-gray-700"
+          : "bg-gray-100 text-gray-700 ring-1 ring-gray-200"
       )}
     >
       {sube ? (
@@ -189,6 +194,54 @@ function TrendBadge({
         {sube ? "sube" : baja ? "baja" : "igual"}
         {label ? ` · ${label}` : ""}
       </span>
+    </div>
+  );
+}
+
+function SectionTitle({
+  dark,
+  icon: Icon,
+  title,
+  subtitle,
+  right,
+}: {
+  dark: boolean;
+  icon: any;
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+}) {
+  return (
+    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex items-start gap-3">
+        <div
+          className={clsx(
+            "mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl",
+            dark ? "bg-gray-900 text-gray-200" : "bg-gray-100 text-gray-700"
+          )}
+        >
+          <Icon size={17} />
+        </div>
+
+        <div>
+          <h2
+            className={clsx(
+              "text-sm font-extrabold uppercase tracking-[0.16em]",
+              dark ? "text-white" : "text-gray-900"
+            )}
+          >
+            {title}
+          </h2>
+
+          {subtitle ? (
+            <p className={clsx("mt-1 text-xs", dark ? "text-gray-400" : "text-gray-500")}>
+              {subtitle}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      {right ? <div className="shrink-0">{right}</div> : null}
     </div>
   );
 }
@@ -209,45 +262,45 @@ function KPI({
   tone?: "default" | "emerald" | "red" | "blue" | "violet" | "amber";
 }) {
   const toneMap: Record<string, string> = {
-    default: dark ? "bg-gray-800/60 text-gray-200" : "bg-gray-100 text-gray-700",
+    default: dark ? "bg-gray-800 text-gray-200" : "bg-gray-100 text-gray-700",
     emerald: dark
       ? "bg-emerald-500/15 text-emerald-200"
-      : "bg-emerald-100 text-emerald-700",
-    red: dark ? "bg-red-500/15 text-red-200" : "bg-red-100 text-red-700",
-    blue: dark ? "bg-blue-500/15 text-blue-200" : "bg-blue-100 text-blue-700",
+      : "bg-emerald-50 text-emerald-700",
+    red: dark ? "bg-red-500/15 text-red-200" : "bg-red-50 text-red-700",
+    blue: dark ? "bg-blue-500/15 text-blue-200" : "bg-blue-50 text-blue-700",
     violet: dark
       ? "bg-violet-500/15 text-violet-200"
-      : "bg-violet-100 text-violet-700",
-    amber: dark
-      ? "bg-amber-500/15 text-amber-200"
-      : "bg-amber-100 text-amber-700",
+      : "bg-violet-50 text-violet-700",
+    amber: dark ? "bg-amber-500/15 text-amber-200" : "bg-amber-50 text-amber-700",
   };
 
   return (
     <div
       className={clsx(
-        "rounded-2xl border p-4 shadow-sm",
-        dark ? "border-gray-800 bg-gray-950/40" : "border-gray-200 bg-white"
+        "group rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md",
+        dark ? "border-gray-800 bg-gray-950/50" : "border-gray-200 bg-white"
       )}
     >
-      <div className="flex items-center justify-between gap-3">
-        <div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
           <p
             className={clsx(
-              "text-xs uppercase tracking-wider",
+              "text-xs font-bold uppercase tracking-[0.14em]",
               dark ? "text-gray-400" : "text-gray-500"
             )}
           >
             {title}
           </p>
+
           <p
             className={clsx(
-              "mt-1 text-2xl font-extrabold",
-              dark ? "text-white" : "text-gray-900"
+              "mt-2 truncate text-2xl font-black tracking-tight",
+              dark ? "text-white" : "text-gray-950"
             )}
           >
             {value}
           </p>
+
           {subtitle ? (
             <p className={clsx("mt-1 text-xs", dark ? "text-gray-400" : "text-gray-500")}>
               {subtitle}
@@ -255,10 +308,88 @@ function KPI({
           ) : null}
         </div>
 
-        <div className={clsx("flex h-11 w-11 items-center justify-center rounded-xl", toneMap[tone])}>
+        <div
+          className={clsx(
+            "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl",
+            toneMap[tone]
+          )}
+        >
           <Icon size={18} />
         </div>
       </div>
+    </div>
+  );
+}
+
+function MetricBox({
+  dark,
+  label,
+  value,
+  tone,
+}: {
+  dark: boolean;
+  label: string;
+  value: string | number;
+  tone: "emerald" | "blue" | "violet" | "red" | "gray";
+}) {
+  const color =
+    tone === "emerald"
+      ? "text-emerald-600"
+      : tone === "blue"
+      ? "text-blue-600"
+      : tone === "violet"
+      ? "text-violet-600"
+      : tone === "red"
+      ? "text-red-600"
+      : dark
+      ? "text-gray-200"
+      : "text-gray-800";
+
+  return (
+    <div
+      className={clsx(
+        "rounded-2xl border p-4",
+        dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50"
+      )}
+    >
+      <p className={clsx("text-xs font-semibold", dark ? "text-gray-400" : "text-gray-500")}>
+        {label}
+      </p>
+      <p className={clsx("mt-2 text-2xl font-black", color)}>{value}</p>
+    </div>
+  );
+}
+
+function ChartCard({
+  dark,
+  title,
+  subtitle,
+  children,
+}: {
+  dark: boolean;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={clsx(
+        "rounded-2xl border p-4 shadow-sm",
+        dark ? "border-gray-800 bg-gray-950/50" : "border-gray-200 bg-white"
+      )}
+    >
+      <div className="mb-4">
+        <p className={clsx("text-sm font-extrabold", dark ? "text-white" : "text-gray-900")}>
+          {title}
+        </p>
+        {subtitle ? (
+          <p className={clsx("mt-1 text-xs", dark ? "text-gray-400" : "text-gray-500")}>
+            {subtitle}
+          </p>
+        ) : null}
+      </div>
+
+      {children}
     </div>
   );
 }
@@ -275,18 +406,20 @@ export default function EstadisticasMensualesPage() {
   const cardBase = useMemo(
     () =>
       clsx(
-        "rounded-2xl border shadow-sm",
-        dark ? "border-gray-800 bg-gray-950/40" : "border-gray-200 bg-white"
+        "rounded-3xl border shadow-sm",
+        dark ? "border-gray-800 bg-gray-950/50" : "border-gray-200 bg-white"
       ),
     [dark]
   );
 
+  const pageBg = dark ? "bg-gray-950 text-white" : "bg-gray-50 text-gray-950";
+
   const btn = useMemo(
     () =>
       clsx(
-        "inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition",
+        "inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-bold transition",
         dark
-          ? "border-gray-700 bg-transparent text-gray-100 hover:bg-gray-900"
+          ? "border-gray-700 bg-gray-900 text-gray-100 hover:bg-gray-800"
           : "border-gray-300 bg-white text-gray-900 hover:bg-gray-50"
       ),
     [dark]
@@ -301,6 +434,7 @@ export default function EstadisticasMensualesPage() {
     setErrorMsg(null);
 
     const rid = await getRestauranteUsuario();
+
     if (!rid) {
       setErrorMsg("No se encontró el restaurante del usuario.");
       setLoading(false);
@@ -529,35 +663,53 @@ export default function EstadisticasMensualesPage() {
   }, [ventasPlatos]);
 
   if (loading && !row) {
-    return <div className="p-4 text-sm">Cargando…</div>;
+    return (
+      <div className={clsx("min-h-screen p-6", pageBg)}>
+        <div
+          className={clsx(
+            "rounded-3xl border p-6 text-sm shadow-sm",
+            dark ? "border-gray-800 bg-gray-950 text-gray-300" : "border-gray-200 bg-white text-gray-600"
+          )}
+        >
+          Cargando estadísticas…
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-5">
-      {/* HEADER */}
+    <div className={clsx("min-h-screen space-y-6 p-4 md:p-6", pageBg)}>
+      {/* CABECERA */}
       <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <BarChart3
-              size={20}
-              className={dark ? "text-gray-300" : "text-gray-700"}
-            />
-            <h1
+          <div className="flex items-center gap-3">
+            <div
               className={clsx(
-                "text-2xl font-extrabold uppercase tracking-wider",
-                dark ? "text-white" : "text-gray-900"
+                "flex h-11 w-11 items-center justify-center rounded-2xl",
+                dark ? "bg-gray-900 text-emerald-300" : "bg-white text-emerald-700 shadow-sm"
               )}
             >
-              Estadísticas mensuales
-            </h1>
+              <BarChart3 size={20} />
+            </div>
+
+            <div>
+              <h1
+                className={clsx(
+                  "text-2xl font-black uppercase tracking-[0.18em]",
+                  dark ? "text-white" : "text-gray-950"
+                )}
+              >
+                Estadísticas mensuales
+              </h1>
+
+              <p className={clsx("mt-1 text-sm", dark ? "text-gray-400" : "text-gray-600")}>
+                {row?.restaurante_nombre ?? "Restaurante"} · mes actual vs mes anterior
+              </p>
+            </div>
           </div>
 
-          <p className={clsx("mt-1 text-sm", dark ? "text-gray-400" : "text-gray-600")}>
-            {row?.restaurante_nombre ?? "Restaurante"} · mes actual vs mes anterior
-          </p>
-
           {restauranteId ? (
-            <p className={clsx("mt-1 text-xs", dark ? "text-gray-500" : "text-gray-500")}>
+            <p className={clsx("mt-3 text-xs", dark ? "text-gray-500" : "text-gray-500")}>
               ID: {restauranteId}
             </p>
           ) : null}
@@ -583,139 +735,135 @@ export default function EstadisticasMensualesPage() {
       )}
 
       {!row ? (
-        <div className={clsx(cardBase, "p-4 text-sm")}>
+        <div className={clsx(cardBase, "p-5 text-sm")}>
           No hay datos para este restaurante.
         </div>
       ) : (
         <>
-          {/* KPIs */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
-            <KPI
+          {/* RESUMEN */}
+          <section className={clsx(cardBase, "p-4 md:p-5")}>
+            <SectionTitle
               dark={dark}
-              title="Restaurante"
-              value={row.restaurante_nombre ?? "—"}
-              subtitle="Panel actual"
-              icon={Building2}
-            />
-
-            <KPI
-              dark={dark}
-              title="Reservas actual"
-              value={fmtInt(row.reservas_mes_actual)}
-              subtitle={`Ant.: ${fmtInt(row.reservas_mes_anterior)}`}
-              icon={CalendarDays}
-              tone="emerald"
-            />
-
-            <KPI
-              dark={dark}
-              title="Clientes nuevos"
-              value={fmtInt(row.clientes_nuevos_mes_actual)}
-              subtitle={`Ant.: ${fmtInt(row.clientes_nuevos_mes_anterior)}`}
-              icon={Users}
-              tone="blue"
-            />
-
-            <KPI
-              dark={dark}
-              title="Reseñas nuevas"
-              value={fmtInt(row.resenas_nuevas_mes_actual)}
-              subtitle={`Ant.: ${fmtInt(row.resenas_nuevas_mes_anterior)}`}
-              icon={MessageSquare}
-              tone="violet"
-            />
-
-            <KPI
-              dark={dark}
-              title="Δ reservas"
-              value={`${row.reservas_diferencia > 0 ? "+" : ""}${fmtInt(
-                row.reservas_diferencia
-              )}`}
-              subtitle={fmtPct(row.reservas_variacion_pct)}
-              icon={row.reservas_diferencia >= 0 ? ArrowUpRight : ArrowDownRight}
-              tone={row.reservas_diferencia >= 0 ? "emerald" : "red"}
-            />
-
-            <KPI
-              dark={dark}
-              title="Tendencia"
-              value={
-                row.reservas_diferencia > 0
-                  ? "Sube"
-                  : row.reservas_diferencia < 0
-                  ? "Baja"
-                  : "Igual"
-              }
-              subtitle="Según reservas"
-              icon={
-                row.reservas_diferencia > 0
-                  ? TrendingUp
-                  : row.reservas_diferencia < 0
-                  ? TrendingDown
-                  : Minus
-              }
-              tone={
-                row.reservas_diferencia > 0
-                  ? "emerald"
-                  : row.reservas_diferencia < 0
-                  ? "red"
-                  : "default"
+              icon={Activity}
+              title="Resumen general"
+              subtitle="Vista rápida del rendimiento mensual del restaurante"
+              right={
+                <TrendBadge
+                  diff={row.reservas_diferencia}
+                  dark={dark}
+                  label={fmtPct(row.reservas_variacion_pct)}
+                />
               }
             />
-          </div>
 
-          {/* RENTABILIDAD MENSUAL ESTIMADA */}
-          <div className={clsx(cardBase, "p-4 md:p-5")}>
-            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <ShoppingCart
-                    size={18}
-                    className={dark ? "text-emerald-300" : "text-emerald-700"}
-                  />
-                  <p
-                    className={clsx(
-                      "text-sm font-semibold",
-                      dark ? "text-white" : "text-gray-900"
-                    )}
-                  >
-                    Rentabilidad mensual estimada
-                  </p>
-                </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
+              <KPI
+                dark={dark}
+                title="Restaurante"
+                value={row.restaurante_nombre ?? "—"}
+                subtitle="Panel actual"
+                icon={Building2}
+              />
 
-                <p
+              <KPI
+                dark={dark}
+                title="Reservas"
+                value={fmtInt(row.reservas_mes_actual)}
+                subtitle={`Ant.: ${fmtInt(row.reservas_mes_anterior)}`}
+                icon={CalendarDays}
+                tone="emerald"
+              />
+
+              <KPI
+                dark={dark}
+                title="Clientes nuevos"
+                value={fmtInt(row.clientes_nuevos_mes_actual)}
+                subtitle={`Ant.: ${fmtInt(row.clientes_nuevos_mes_anterior)}`}
+                icon={Users}
+                tone="blue"
+              />
+
+              <KPI
+                dark={dark}
+                title="Reseñas nuevas"
+                value={fmtInt(row.resenas_nuevas_mes_actual)}
+                subtitle={`Ant.: ${fmtInt(row.resenas_nuevas_mes_anterior)}`}
+                icon={MessageSquare}
+                tone="violet"
+              />
+
+              <KPI
+                dark={dark}
+                title="Diferencia reservas"
+                value={`${row.reservas_diferencia > 0 ? "+" : ""}${fmtInt(
+                  row.reservas_diferencia
+                )}`}
+                subtitle={fmtPct(row.reservas_variacion_pct)}
+                icon={row.reservas_diferencia >= 0 ? ArrowUpRight : ArrowDownRight}
+                tone={row.reservas_diferencia >= 0 ? "emerald" : "red"}
+              />
+
+              <KPI
+                dark={dark}
+                title="Tendencia"
+                value={
+                  row.reservas_diferencia > 0
+                    ? "Sube"
+                    : row.reservas_diferencia < 0
+                    ? "Baja"
+                    : "Igual"
+                }
+                subtitle="Según reservas"
+                icon={
+                  row.reservas_diferencia > 0
+                    ? TrendingUp
+                    : row.reservas_diferencia < 0
+                    ? TrendingDown
+                    : Minus
+                }
+                tone={
+                  row.reservas_diferencia > 0
+                    ? "emerald"
+                    : row.reservas_diferencia < 0
+                    ? "red"
+                    : "default"
+                }
+              />
+            </div>
+          </section>
+
+          {/* RENTABILIDAD */}
+          <section className={clsx(cardBase, "p-4 md:p-5")}>
+            <SectionTitle
+              dark={dark}
+              icon={ShoppingCart}
+              title="Rentabilidad mensual"
+              subtitle="Basado en ventas por plato y coste de receta guardado"
+              right={
+                <div
                   className={clsx(
-                    "mt-1 text-xs",
-                    dark ? "text-gray-400" : "text-gray-500"
+                    "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold",
+                    rentabilidadMensual.diferenciaBeneficio >= 0
+                      ? dark
+                        ? "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-500/20"
+                        : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                      : dark
+                      ? "bg-red-500/15 text-red-200 ring-1 ring-red-500/20"
+                      : "bg-red-50 text-red-700 ring-1 ring-red-200"
                   )}
                 >
-                  Basado en las ventas registradas por plato y el coste de receta guardado.
-                </p>
-              </div>
-
-              <div
-                className={clsx(
-                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold",
-                  rentabilidadMensual.diferenciaBeneficio >= 0
-                    ? dark
-                      ? "bg-emerald-500/20 text-emerald-200"
-                      : "bg-emerald-100 text-emerald-700"
-                    : dark
-                    ? "bg-red-500/20 text-red-200"
-                    : "bg-red-100 text-red-700"
-                )}
-              >
-                {rentabilidadMensual.diferenciaBeneficio >= 0 ? (
-                  <TrendingUp size={12} />
-                ) : (
-                  <TrendingDown size={12} />
-                )}
-                <span>
-                  {rentabilidadMensual.diferenciaBeneficio >= 0 ? "+" : ""}
-                  {fmtEuro(rentabilidadMensual.diferenciaBeneficio)} vs mes anterior
-                </span>
-              </div>
-            </div>
+                  {rentabilidadMensual.diferenciaBeneficio >= 0 ? (
+                    <TrendingUp size={12} />
+                  ) : (
+                    <TrendingDown size={12} />
+                  )}
+                  <span>
+                    {rentabilidadMensual.diferenciaBeneficio >= 0 ? "+" : ""}
+                    {fmtEuro(rentabilidadMensual.diferenciaBeneficio)} vs mes anterior
+                  </span>
+                </div>
+              }
+            />
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
               <KPI
@@ -757,267 +905,186 @@ export default function EstadisticasMensualesPage() {
               <div
                 className={clsx(
                   "rounded-2xl border p-4 shadow-sm",
+                  dark ? "border-gray-800 bg-gray-950/50" : "border-gray-200 bg-white"
+                )}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p
+                      className={clsx(
+                        "text-xs font-bold uppercase tracking-[0.14em]",
+                        dark ? "text-gray-400" : "text-gray-500"
+                      )}
+                    >
+                      Top plato
+                    </p>
+
+                    <p
+                      className={clsx(
+                        "mt-2 truncate text-xl font-black",
+                        dark ? "text-white" : "text-gray-950"
+                      )}
+                    >
+                      {rentabilidadMensual.topPlato?.nombre ?? "Sin datos"}
+                    </p>
+
+                    <p
+                      className={clsx(
+                        "mt-1 text-xs",
+                        dark ? "text-gray-400" : "text-gray-500"
+                      )}
+                    >
+                      {rentabilidadMensual.topPlato
+                        ? `${fmtEuro(rentabilidadMensual.topPlato.beneficio)} · ${fmtInt(
+                            rentabilidadMensual.topPlato.unidades
+                          )} uds.`
+                        : "Registra ventas para verlo"}
+                    </p>
+                  </div>
+
+                  <div
+                    className={clsx(
+                      "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl",
+                      dark ? "bg-violet-500/15 text-violet-200" : "bg-violet-50 text-violet-700"
+                    )}
+                  >
+                    <Trophy size={18} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* METRICAS */}
+          <section className={clsx(cardBase, "p-4 md:p-5")}>
+            <SectionTitle
+              dark={dark}
+              icon={Target}
+              title="Métricas principales"
+              subtitle="Comparación directa entre mes actual y mes anterior"
+            />
+
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+              <div
+                className={clsx(
+                  "rounded-2xl border p-4",
                   dark ? "border-gray-800 bg-gray-950/40" : "border-gray-200 bg-white"
                 )}
               >
-                <p
-                  className={clsx(
-                    "text-xs uppercase tracking-wider",
-                    dark ? "text-gray-400" : "text-gray-500"
-                  )}
-                >
-                  Top plato por beneficio
-                </p>
-
-                <p
-                  className={clsx(
-                    "mt-1 truncate text-lg font-extrabold",
-                    dark ? "text-white" : "text-gray-900"
-                  )}
-                >
-                  {rentabilidadMensual.topPlato?.nombre ?? "Sin datos"}
-                </p>
-
-                <p
-                  className={clsx(
-                    "mt-1 text-xs",
-                    dark ? "text-gray-400" : "text-gray-500"
-                  )}
-                >
-                  {rentabilidadMensual.topPlato
-                    ? `${fmtEuro(rentabilidadMensual.topPlato.beneficio)} · ${fmtInt(
-                        rentabilidadMensual.topPlato.unidades
-                      )} uds.`
-                    : "Registra ventas para verlo"}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* BLOQUES VISUALES */}
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-            <div className={clsx(cardBase, "p-4")}>
-              <div className="mb-3 flex items-center justify-between">
-                <p className={clsx("text-sm font-semibold", dark ? "text-white" : "text-gray-900")}>
-                  Reservas
-                </p>
-                <TrendBadge
-                  diff={row.reservas_diferencia}
-                  dark={dark}
-                  label={fmtPct(row.reservas_variacion_pct)}
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Actual
+                <div className="mb-4 flex items-center justify-between gap-2">
+                  <p className={clsx("text-sm font-black", dark ? "text-white" : "text-gray-900")}>
+                    Reservas
                   </p>
-                  <p className="mt-1 text-xl font-extrabold text-emerald-600">
-                    {fmtInt(row.reservas_mes_actual)}
-                  </p>
+                  <TrendBadge
+                    diff={row.reservas_diferencia}
+                    dark={dark}
+                    label={fmtPct(row.reservas_variacion_pct)}
+                  />
                 </div>
 
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Anterior
-                  </p>
-                  <p className="mt-1 text-xl font-extrabold text-red-600">
-                    {fmtInt(row.reservas_mes_anterior)}
-                  </p>
-                </div>
-
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Dif.
-                  </p>
-                  <p
-                    className={clsx(
-                      "mt-1 text-xl font-extrabold",
-                      row.reservas_diferencia >= 0 ? "text-emerald-600" : "text-red-600"
-                    )}
-                  >
-                    {row.reservas_diferencia > 0 ? "+" : ""}
-                    {fmtInt(row.reservas_diferencia)}
-                  </p>
+                <div className="grid grid-cols-3 gap-3">
+                  <MetricBox dark={dark} label="Actual" value={fmtInt(row.reservas_mes_actual)} tone="emerald" />
+                  <MetricBox dark={dark} label="Anterior" value={fmtInt(row.reservas_mes_anterior)} tone="red" />
+                  <MetricBox
+                    dark={dark}
+                    label="Dif."
+                    value={`${row.reservas_diferencia > 0 ? "+" : ""}${fmtInt(row.reservas_diferencia)}`}
+                    tone={row.reservas_diferencia >= 0 ? "emerald" : "red"}
+                  />
                 </div>
               </div>
-            </div>
 
-            <div className={clsx(cardBase, "p-4")}>
-              <div className="mb-3 flex items-center justify-between">
-                <p className={clsx("text-sm font-semibold", dark ? "text-white" : "text-gray-900")}>
-                  Clientes nuevos
-                </p>
-                <TrendBadge
-                  diff={row.clientes_nuevos_diferencia}
-                  dark={dark}
-                  label={fmtPct(row.clientes_nuevos_variacion_pct)}
-                />
+              <div
+                className={clsx(
+                  "rounded-2xl border p-4",
+                  dark ? "border-gray-800 bg-gray-950/40" : "border-gray-200 bg-white"
+                )}
+              >
+                <div className="mb-4 flex items-center justify-between gap-2">
+                  <p className={clsx("text-sm font-black", dark ? "text-white" : "text-gray-900")}>
+                    Clientes nuevos
+                  </p>
+                  <TrendBadge
+                    diff={row.clientes_nuevos_diferencia}
+                    dark={dark}
+                    label={fmtPct(row.clientes_nuevos_variacion_pct)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <MetricBox dark={dark} label="Actual" value={fmtInt(row.clientes_nuevos_mes_actual)} tone="blue" />
+                  <MetricBox dark={dark} label="Anterior" value={fmtInt(row.clientes_nuevos_mes_anterior)} tone="red" />
+                  <MetricBox
+                    dark={dark}
+                    label="Dif."
+                    value={`${row.clientes_nuevos_diferencia > 0 ? "+" : ""}${fmtInt(
+                      row.clientes_nuevos_diferencia
+                    )}`}
+                    tone={row.clientes_nuevos_diferencia >= 0 ? "emerald" : "red"}
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Actual
+              <div
+                className={clsx(
+                  "rounded-2xl border p-4",
+                  dark ? "border-gray-800 bg-gray-950/40" : "border-gray-200 bg-white"
+                )}
+              >
+                <div className="mb-4 flex items-center justify-between gap-2">
+                  <p className={clsx("text-sm font-black", dark ? "text-white" : "text-gray-900")}>
+                    Reseñas nuevas
                   </p>
-                  <p className="mt-1 text-xl font-extrabold text-blue-600">
-                    {fmtInt(row.clientes_nuevos_mes_actual)}
-                  </p>
+                  <TrendBadge
+                    diff={row.resenas_nuevas_diferencia}
+                    dark={dark}
+                    label={fmtPct(row.resenas_nuevas_variacion_pct)}
+                  />
                 </div>
 
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Anterior
-                  </p>
-                  <p className="mt-1 text-xl font-extrabold text-red-600">
-                    {fmtInt(row.clientes_nuevos_mes_anterior)}
-                  </p>
-                </div>
-
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Dif.
-                  </p>
-                  <p
-                    className={clsx(
-                      "mt-1 text-xl font-extrabold",
-                      row.clientes_nuevos_diferencia >= 0 ? "text-emerald-600" : "text-red-600"
-                    )}
-                  >
-                    {row.clientes_nuevos_diferencia > 0 ? "+" : ""}
-                    {fmtInt(row.clientes_nuevos_diferencia)}
-                  </p>
+                <div className="grid grid-cols-3 gap-3">
+                  <MetricBox dark={dark} label="Actual" value={fmtInt(row.resenas_nuevas_mes_actual)} tone="violet" />
+                  <MetricBox dark={dark} label="Anterior" value={fmtInt(row.resenas_nuevas_mes_anterior)} tone="red" />
+                  <MetricBox
+                    dark={dark}
+                    label="Dif."
+                    value={`${row.resenas_nuevas_diferencia > 0 ? "+" : ""}${fmtInt(
+                      row.resenas_nuevas_diferencia
+                    )}`}
+                    tone={row.resenas_nuevas_diferencia >= 0 ? "emerald" : "red"}
+                  />
                 </div>
               </div>
             </div>
-
-            <div className={clsx(cardBase, "p-4")}>
-              <div className="mb-3 flex items-center justify-between">
-                <p className={clsx("text-sm font-semibold", dark ? "text-white" : "text-gray-900")}>
-                  Reseñas nuevas
-                </p>
-                <TrendBadge
-                  diff={row.resenas_nuevas_diferencia}
-                  dark={dark}
-                  label={fmtPct(row.resenas_nuevas_variacion_pct)}
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Actual
-                  </p>
-                  <p className="mt-1 text-xl font-extrabold text-violet-600">
-                    {fmtInt(row.resenas_nuevas_mes_actual)}
-                  </p>
-                </div>
-
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Anterior
-                  </p>
-                  <p className="mt-1 text-xl font-extrabold text-red-600">
-                    {fmtInt(row.resenas_nuevas_mes_anterior)}
-                  </p>
-                </div>
-
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Dif.
-                  </p>
-                  <p
-                    className={clsx(
-                      "mt-1 text-xl font-extrabold",
-                      row.resenas_nuevas_diferencia >= 0 ? "text-emerald-600" : "text-red-600"
-                    )}
-                  >
-                    {row.resenas_nuevas_diferencia > 0 ? "+" : ""}
-                    {fmtInt(row.resenas_nuevas_diferencia)}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          </section>
 
           {/* GRAFICOS */}
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <div className={clsx(cardBase, "p-4")}>
-              <div className="mb-3">
-                <p className={clsx("text-sm font-semibold", dark ? "text-white" : "text-gray-900")}>
-                  Comparativa global
-                </p>
-                <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                  Actual vs anterior
-                </p>
-              </div>
+          <section className={clsx(cardBase, "p-4 md:p-5")}>
+            <SectionTitle
+              dark={dark}
+              icon={PieIcon}
+              title="Gráficos"
+              subtitle="Lectura visual de reservas, clientes y reseñas"
+            />
 
-              <div className="h-[320px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartComparativaGlobal}>
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke={dark ? "#374151" : "#e5e7eb"}
-                    />
-                    <XAxis
-                      dataKey="nombre"
-                      stroke={dark ? "#d1d5db" : "#4b5563"}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis
-                      stroke={dark ? "#d1d5db" : "#4b5563"}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: dark ? "#111827" : "#ffffff",
-                        border: `1px solid ${dark ? "#374151" : "#e5e7eb"}`,
-                        borderRadius: 12,
-                        color: dark ? "#fff" : "#111827",
-                      }}
-                    />
-                    <Legend />
-                    <Bar
-                      dataKey="anterior"
-                      name="Mes anterior"
-                      radius={[6, 6, 0, 0]}
-                      fill={dark ? "#6b7280" : "#94a3b8"}
-                    />
-                    <Bar
-                      dataKey="actual"
-                      name="Mes actual"
-                      radius={[6, 6, 0, 0]}
-                      fill={dark ? "#10b981" : "#059669"}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className={clsx(cardBase, "p-4")}>
-              <div className="mb-3">
-                <p className={clsx("text-sm font-semibold", dark ? "text-white" : "text-gray-900")}>
-                  Distribución (mes actual)
-                </p>
-                <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                  Reservas / clientes / reseñas
-                </p>
-              </div>
-
-              {chartDistribucion.length === 0 ? (
-                <div
-                  className={clsx(
-                    "flex h-[320px] items-center justify-center text-sm",
-                    dark ? "text-gray-400" : "text-gray-500"
-                  )}
-                >
-                  No hay datos para mostrar
-                </div>
-              ) : (
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              <ChartCard dark={dark} title="Comparativa global" subtitle="Mes actual vs mes anterior">
                 <div className="h-[320px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
+                    <BarChart data={chartComparativaGlobal}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={dark ? "#374151" : "#e5e7eb"}
+                      />
+                      <XAxis
+                        dataKey="nombre"
+                        stroke={dark ? "#d1d5db" : "#4b5563"}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis
+                        stroke={dark ? "#d1d5db" : "#4b5563"}
+                        tick={{ fontSize: 12 }}
+                      />
                       <Tooltip
                         contentStyle={{
                           background: dark ? "#111827" : "#ffffff",
@@ -1027,281 +1094,229 @@ export default function EstadisticasMensualesPage() {
                         }}
                       />
                       <Legend />
-                      <Pie
-                        data={chartDistribucion}
-                        dataKey="value"
-                        nameKey="name"
-                        innerRadius={65}
-                        outerRadius={110}
-                        paddingAngle={3}
-                      >
-                        {chartDistribucion.map((_, i) => (
-                          <Cell key={i} fill={pieColors[i % pieColors.length]} />
-                        ))}
-                      </Pie>
-                    </PieChart>
+                      <Bar
+                        dataKey="anterior"
+                        name="Mes anterior"
+                        radius={[8, 8, 0, 0]}
+                        fill={dark ? "#6b7280" : "#94a3b8"}
+                      />
+                      <Bar
+                        dataKey="actual"
+                        name="Mes actual"
+                        radius={[8, 8, 0, 0]}
+                        fill={dark ? "#10b981" : "#059669"}
+                      />
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
-              )}
-            </div>
-          </div>
+              </ChartCard>
 
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-            <div className={clsx(cardBase, "p-4 xl:col-span-2")}>
-              <div className="mb-3">
-                <p className={clsx("text-sm font-semibold", dark ? "text-white" : "text-gray-900")}>
-                  Ranking interno de métricas
-                </p>
-                <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                  Comparación de las 3 métricas del restaurante
-                </p>
-              </div>
-
-              <div className="h-[360px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={[
-                      { nombre: "Reservas", valor: row.reservas_mes_actual },
-                      { nombre: "Clientes nuevos", valor: row.clientes_nuevos_mes_actual },
-                      { nombre: "Reseñas nuevas", valor: row.resenas_nuevas_mes_actual },
-                    ]}
-                  >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke={dark ? "#374151" : "#e5e7eb"}
-                    />
-                    <XAxis
-                      dataKey="nombre"
-                      stroke={dark ? "#d1d5db" : "#4b5563"}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis
-                      stroke={dark ? "#d1d5db" : "#4b5563"}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: dark ? "#111827" : "#ffffff",
-                        border: `1px solid ${dark ? "#374151" : "#e5e7eb"}`,
-                        borderRadius: 12,
-                        color: dark ? "#fff" : "#111827",
-                      }}
-                    />
-                    <Bar dataKey="valor" name="Mes actual" radius={[6, 6, 0, 0]}>
-                      {[
-                        { nombre: "Reservas", valor: row.reservas_mes_actual },
-                        { nombre: "Clientes nuevos", valor: row.clientes_nuevos_mes_actual },
-                        { nombre: "Reseñas nuevas", valor: row.resenas_nuevas_mes_actual },
-                      ].map((entry, index) => {
-                        const color =
-                          entry.nombre === "Reservas"
-                            ? dark
-                              ? "#10b981"
-                              : "#059669"
-                            : entry.nombre === "Clientes nuevos"
-                            ? dark
-                              ? "#3b82f6"
-                              : "#2563eb"
-                            : dark
-                            ? "#8b5cf6"
-                            : "#7c3aed";
-
-                        return <Cell key={`cell-${index}`} fill={color} />;
-                      })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className={clsx(cardBase, "p-4")}>
-              <div className="mb-3">
-                <p className={clsx("text-sm font-semibold", dark ? "text-white" : "text-gray-900")}>
-                  Perfil del restaurante
-                </p>
-                <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                  {row.restaurante_nombre ?? "Restaurante"}
-                </p>
-              </div>
-
-              <div className="h-[360px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={chartRadar}>
-                    <PolarGrid stroke={dark ? "#374151" : "#d1d5db"} />
-                    <PolarAngleAxis
-                      dataKey="metric"
-                      tick={{
-                        fill: dark ? "#d1d5db" : "#4b5563",
-                        fontSize: 12,
-                      }}
-                    />
-                    <PolarRadiusAxis
-                      tick={{
-                        fill: dark ? "#9ca3af" : "#6b7280",
-                        fontSize: 10,
-                      }}
-                    />
-                    <Radar dataKey="valor" fillOpacity={0.35} />
-                    <Tooltip
-                      contentStyle={{
-                        background: dark ? "#111827" : "#ffffff",
-                        border: `1px solid ${dark ? "#374151" : "#e5e7eb"}`,
-                        borderRadius: 12,
-                        color: dark ? "#fff" : "#111827",
-                      }}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          {/* TARJETA DETALLE */}
-          <div className={clsx(cardBase, "p-4 md:p-5")}>
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <div>
-                <p className={clsx("text-sm font-semibold", dark ? "text-white" : "text-gray-900")}>
-                  Detalle del restaurante
-                </p>
-                <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                  Resumen mensual visual
-                </p>
-              </div>
-
-              <TrendBadge
-                diff={row.reservas_diferencia}
-                dark={dark}
-                label={fmtPct(row.reservas_variacion_pct)}
-              />
-            </div>
-
-            <div
-              className={clsx(
-                "max-w-3xl rounded-2xl border p-4 shadow-sm",
-                dark ? "border-gray-800 bg-gray-950/30" : "border-gray-200 bg-white"
-              )}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className={clsx("truncate text-sm font-semibold", dark ? "text-white" : "text-gray-900")}>
-                    {row.restaurante_nombre ?? "Restaurante"}
-                  </p>
-                  <p className={clsx("mt-1 text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Resumen mensual
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <div className="flex items-center justify-between">
-                  <p
+              <ChartCard dark={dark} title="Distribución del mes actual" subtitle="Reservas / clientes / reseñas">
+                {chartDistribucion.length === 0 ? (
+                  <div
                     className={clsx(
-                      "text-xs font-semibold uppercase tracking-wider",
+                      "flex h-[320px] items-center justify-center text-sm",
                       dark ? "text-gray-400" : "text-gray-500"
                     )}
                   >
-                    Reservas
-                  </p>
-
-                  <div
-                    className={clsx(
-                      "text-xs font-semibold",
-                      row.reservas_diferencia >= 0 ? "text-emerald-600" : "text-red-600"
-                    )}
-                  >
-                    {row.reservas_diferencia > 0 ? "+" : ""}
-                    {fmtInt(row.reservas_diferencia)}
+                    No hay datos para mostrar
                   </div>
+                ) : (
+                  <div className="h-[320px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Tooltip
+                          contentStyle={{
+                            background: dark ? "#111827" : "#ffffff",
+                            border: `1px solid ${dark ? "#374151" : "#e5e7eb"}`,
+                            borderRadius: 12,
+                            color: dark ? "#fff" : "#111827",
+                          }}
+                        />
+                        <Legend />
+                        <Pie
+                          data={chartDistribucion}
+                          dataKey="value"
+                          nameKey="name"
+                          innerRadius={70}
+                          outerRadius={115}
+                          paddingAngle={4}
+                        >
+                          {chartDistribucion.map((_, i) => (
+                            <Cell key={i} fill={pieColors[i % pieColors.length]} />
+                          ))}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </ChartCard>
+
+              <ChartCard
+                dark={dark}
+                title="Ranking interno de métricas"
+                subtitle="Comparación de las 3 métricas principales"
+              >
+                <div className="h-[340px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={[
+                        { nombre: "Reservas", valor: row.reservas_mes_actual },
+                        { nombre: "Clientes nuevos", valor: row.clientes_nuevos_mes_actual },
+                        { nombre: "Reseñas nuevas", valor: row.resenas_nuevas_mes_actual },
+                      ]}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={dark ? "#374151" : "#e5e7eb"}
+                      />
+                      <XAxis
+                        dataKey="nombre"
+                        stroke={dark ? "#d1d5db" : "#4b5563"}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis
+                        stroke={dark ? "#d1d5db" : "#4b5563"}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: dark ? "#111827" : "#ffffff",
+                          border: `1px solid ${dark ? "#374151" : "#e5e7eb"}`,
+                          borderRadius: 12,
+                          color: dark ? "#fff" : "#111827",
+                        }}
+                      />
+                      <Bar dataKey="valor" name="Mes actual" radius={[8, 8, 0, 0]}>
+                        {[
+                          { nombre: "Reservas", valor: row.reservas_mes_actual },
+                          { nombre: "Clientes nuevos", valor: row.clientes_nuevos_mes_actual },
+                          { nombre: "Reseñas nuevas", valor: row.resenas_nuevas_mes_actual },
+                        ].map((entry, index) => {
+                          const color =
+                            entry.nombre === "Reservas"
+                              ? dark
+                                ? "#10b981"
+                                : "#059669"
+                              : entry.nombre === "Clientes nuevos"
+                              ? dark
+                                ? "#3b82f6"
+                                : "#2563eb"
+                              : dark
+                              ? "#8b5cf6"
+                              : "#7c3aed";
+
+                          return <Cell key={`cell-${index}`} fill={color} />;
+                        })}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
+              </ChartCard>
 
-                <div className="mt-2 grid grid-cols-2 gap-3">
-                  <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                    <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                      Mes actual
-                    </p>
-                    <p className="mt-1 text-2xl font-extrabold text-emerald-600">
-                      {fmtInt(row.reservas_mes_actual)}
-                    </p>
-                  </div>
-
-                  <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                    <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                      Mes anterior
-                    </p>
-                    <p className="mt-1 text-2xl font-extrabold text-red-600">
-                      {fmtInt(row.reservas_mes_anterior)}
-                    </p>
-                  </div>
+              <ChartCard dark={dark} title="Perfil del restaurante" subtitle={row.restaurante_nombre ?? "Restaurante"}>
+                <div className="h-[340px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart data={chartRadar}>
+                      <PolarGrid stroke={dark ? "#374151" : "#d1d5db"} />
+                      <PolarAngleAxis
+                        dataKey="metric"
+                        tick={{
+                          fill: dark ? "#d1d5db" : "#4b5563",
+                          fontSize: 12,
+                        }}
+                      />
+                      <PolarRadiusAxis
+                        tick={{
+                          fill: dark ? "#9ca3af" : "#6b7280",
+                          fontSize: 10,
+                        }}
+                      />
+                      <Radar
+                        dataKey="valor"
+                        stroke={dark ? "#10b981" : "#059669"}
+                        fill={dark ? "#10b981" : "#059669"}
+                        fillOpacity={0.28}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: dark ? "#111827" : "#ffffff",
+                          border: `1px solid ${dark ? "#374151" : "#e5e7eb"}`,
+                          borderRadius: 12,
+                          color: dark ? "#fff" : "#111827",
+                        }}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
                 </div>
-              </div>
+              </ChartCard>
+            </div>
+          </section>
 
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                      Clientes nuevos
-                    </p>
+          {/* DETALLE */}
+          <section className={clsx(cardBase, "p-4 md:p-5")}>
+            <SectionTitle
+              dark={dark}
+              icon={Building2}
+              title="Detalle del restaurante"
+              subtitle="Resumen mensual visual"
+              right={
+                <TrendBadge
+                  diff={row.reservas_diferencia}
+                  dark={dark}
+                  label={fmtPct(row.reservas_variacion_pct)}
+                />
+              }
+            />
 
-                    {row.clientes_nuevos_diferencia > 0 ? (
-                      <TrendingUp size={13} className="text-emerald-600" />
-                    ) : row.clientes_nuevos_diferencia < 0 ? (
-                      <TrendingDown size={13} className="text-red-600" />
-                    ) : (
-                      <Minus size={13} className={dark ? "text-gray-400" : "text-gray-500"} />
-                    )}
-                  </div>
-
-                  <p className="mt-1 text-xl font-extrabold text-blue-600">
-                    {fmtInt(row.clientes_nuevos_mes_actual)}
+            <div
+              className={clsx(
+                "rounded-3xl border p-4 md:p-5",
+                dark ? "border-gray-800 bg-gray-950/40" : "border-gray-200 bg-gray-50"
+              )}
+            >
+              <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className={clsx("text-lg font-black", dark ? "text-white" : "text-gray-950")}>
+                    {row.restaurante_nombre ?? "Restaurante"}
                   </p>
-
                   <p className={clsx("mt-1 text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Ant.: {fmtInt(row.clientes_nuevos_mes_anterior)} ·{" "}
-                    {row.clientes_nuevos_diferencia > 0 ? "+" : ""}
-                    {fmtInt(row.clientes_nuevos_diferencia)}
+                    Informe mensual del restaurante
                   </p>
                 </div>
 
-                <div className={clsx("rounded-xl border p-3", dark ? "border-gray-800 bg-gray-900/40" : "border-gray-200 bg-gray-50")}>
-                  <div className="flex items-center justify-between gap-2">
-                    <p className={clsx("text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                      Reseñas nuevas
-                    </p>
-
-                    {row.resenas_nuevas_diferencia > 0 ? (
-                      <TrendingUp size={13} className="text-emerald-600" />
-                    ) : row.resenas_nuevas_diferencia < 0 ? (
-                      <TrendingDown size={13} className="text-red-600" />
-                    ) : (
-                      <Minus size={13} className={dark ? "text-gray-400" : "text-gray-500"} />
-                    )}
-                  </div>
-
-                  <p className="mt-1 text-xl font-extrabold text-violet-600">
-                    {fmtInt(row.resenas_nuevas_mes_actual)}
-                  </p>
-
-                  <p className={clsx("mt-1 text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                    Ant.: {fmtInt(row.resenas_nuevas_mes_anterior)} ·{" "}
-                    {row.resenas_nuevas_diferencia > 0 ? "+" : ""}
-                    {fmtInt(row.resenas_nuevas_diferencia)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <p className={clsx("mb-2 text-xs", dark ? "text-gray-400" : "text-gray-500")}>
-                  Actual vs anterior (reservas)
+                <p className={clsx("text-xs", dark ? "text-gray-500" : "text-gray-500")}>
+                  Actual vs anterior
                 </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+                <MetricBox dark={dark} label="Reservas mes actual" value={fmtInt(row.reservas_mes_actual)} tone="emerald" />
+                <MetricBox dark={dark} label="Reservas mes anterior" value={fmtInt(row.reservas_mes_anterior)} tone="red" />
+                <MetricBox dark={dark} label="Clientes nuevos" value={fmtInt(row.clientes_nuevos_mes_actual)} tone="blue" />
+                <MetricBox dark={dark} label="Reseñas nuevas" value={fmtInt(row.resenas_nuevas_mes_actual)} tone="violet" />
+              </div>
+
+              <div className="mt-5">
+                <div className="mb-2 flex items-center justify-between text-xs">
+                  <span className={dark ? "text-gray-400" : "text-gray-500"}>
+                    Peso del mes actual en reservas
+                  </span>
+
+                  <span className={dark ? "text-gray-400" : "text-gray-500"}>
+                    Actual: {fmtInt(row.reservas_mes_actual)} · Anterior:{" "}
+                    {fmtInt(row.reservas_mes_anterior)}
+                  </span>
+                </div>
 
                 <div
                   className={clsx(
-                    "h-2 overflow-hidden rounded-full",
+                    "h-3 overflow-hidden rounded-full",
                     dark ? "bg-gray-800" : "bg-gray-200"
                   )}
                 >
                   <div
-                    className="h-full bg-emerald-500"
+                    className="h-full rounded-full bg-emerald-500"
                     style={{
                       width: `${Math.max(
                         row.reservas_mes_actual + row.reservas_mes_anterior === 0
@@ -1314,18 +1329,9 @@ export default function EstadisticasMensualesPage() {
                     }}
                   />
                 </div>
-
-                <div className="mt-2 flex items-center justify-between text-xs">
-                  <span className={dark ? "text-gray-400" : "text-gray-500"}>
-                    Actual: {fmtInt(row.reservas_mes_actual)}
-                  </span>
-                  <span className={dark ? "text-gray-400" : "text-gray-500"}>
-                    Anterior: {fmtInt(row.reservas_mes_anterior)}
-                  </span>
-                </div>
               </div>
             </div>
-          </div>
+          </section>
         </>
       )}
     </div>

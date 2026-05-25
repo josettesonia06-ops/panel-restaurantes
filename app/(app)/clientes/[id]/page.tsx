@@ -135,26 +135,26 @@ function estadoClase(estado: string | null) {
 
 function badgeBinario(tipo: "ok" | "no" | "neutral") {
   if (tipo === "ok") {
-    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300";
   }
 
   if (tipo === "no") {
-    return "border-slate-200 bg-slate-50 text-slate-700";
+    return "border-slate-200 bg-slate-50 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300";
   }
 
-  return "border-amber-200 bg-amber-50 text-amber-700";
+  return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300";
 }
 
 function badgeAtendida(atendida: boolean | null) {
   if (atendida === true) {
-    return "border-emerald-200 bg-emerald-50 text-emerald-700";
+    return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300";
   }
 
   if (atendida === false) {
-    return "border-red-200 bg-red-50 text-red-700";
+    return "border-red-200 bg-red-50 text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300";
   }
 
-  return "border-slate-200 bg-slate-50 text-slate-700";
+  return "border-slate-200 bg-slate-50 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300";
 }
 
 export default function ClienteHistorialPage() {
@@ -408,90 +408,90 @@ export default function ClienteHistorialPage() {
 
         <button
           onClick={() => setShowAddVisita(true)}
-          className="inline-flex w-fit items-center rounded-xl border border-slate-900 bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:border-white/15 dark:bg-transparent dark:hover:bg-white/5"
+          className="inline-flex w-fit items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-900"
         >
           Añadir visita
         </button>
       </div>
 
       {loading && (
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm dark:border-white/10 dark:bg-white dark:text-slate-600">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
           Cargando ficha del cliente...
         </div>
       )}
 
       {!loading && !cliente && (
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm dark:border-white/10 dark:bg-white dark:text-slate-600">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
           No se ha encontrado el cliente
         </div>
       )}
 
       {!loading && cliente && (
         <>
-          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-white">
+          <div className="card overflow-hidden">
             <div className="px-6 py-5">
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.4fr_0.9fr]">
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
                       <UserRound className="h-6 w-6" />
                     </div>
 
                     <div className="min-w-0">
-                      <h2 className="truncate text-2xl font-bold text-slate-900">
+                      <h2 className="truncate text-2xl font-bold text-slate-900 dark:text-white">
                         {cliente.nombre || "Cliente sin nombre"}
                       </h2>
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         Cliente registrado desde {formatFecha(cliente.created_at)}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-3 text-sm text-slate-600">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5">
+                  <div className="flex flex-wrap gap-3 text-sm text-slate-600 dark:text-slate-300">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 dark:border-white/10 dark:bg-white/5">
                       <Phone className="h-4 w-4" />
                       {cliente.telefono || "-"}
                     </span>
 
-                    <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 dark:border-white/10 dark:bg-white/5">
                       <Mail className="h-4 w-4" />
                       {cliente.email || "-"}
                     </span>
 
-                    <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 dark:border-white/10 dark:bg-white/5">
                       <CalendarDays className="h-4 w-4" />
                       Nacimiento: {formatFecha(cliente.fecha_nacimiento)}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                         Última visita
                       </p>
-                      <p className="mt-2 text-base font-bold text-slate-900">
+                      <p className="mt-2 text-base font-bold text-slate-900 dark:text-white">
                         {formatFecha(
                           resumenReal.ultimaVisita || cliente.ultima_visita
                         )}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                         Próxima reserva
                       </p>
-                      <p className="mt-2 text-base font-bold text-slate-900">
+                      <p className="mt-2 text-base font-bold text-slate-900 dark:text-white">
                         {formatFechaHora(
                           resumenReal.proximaReserva || cliente.proxima_reserva
                         )}
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
                         Canal
                       </p>
-                      <p className="mt-2 text-base font-bold text-slate-900">
+                      <p className="mt-2 text-base font-bold text-slate-900 dark:text-white">
                         {formatCanal(cliente.canal_contacto)}
                       </p>
                     </div>
@@ -502,7 +502,7 @@ export default function ClienteHistorialPage() {
                       {cliente.etiquetas.map((tag) => (
                         <span
                           key={tag}
-                          className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700"
+                          className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
                         >
                           <Tag className="h-3.5 w-3.5" />
                           {tag}
@@ -513,38 +513,38 @@ export default function ClienteHistorialPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl border border-blue-100 bg-blue-50/80 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <div className="rounded-2xl border border-blue-100 bg-blue-50/80 p-4 dark:border-blue-500/20 dark:bg-blue-500/10">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">
                       Visitas reales
                     </p>
-                    <p className="mt-2 text-3xl font-extrabold text-slate-900">
+                    <p className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">
                       {resumenReal.totalAtendidas}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-violet-100 bg-violet-50/80 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <div className="rounded-2xl border border-violet-100 bg-violet-50/80 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
                       Puntos
                     </p>
-                    <p className="mt-2 text-3xl font-extrabold text-slate-900">
+                    <p className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">
                       {cliente.puntos_totales ?? 0}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50/80 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
                       Reservas
                     </p>
-                    <p className="mt-2 text-3xl font-extrabold text-slate-900">
+                    <p className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">
                       {resumenReal.totalReservas}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-amber-100 bg-amber-50/80 p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  <div className="rounded-2xl border border-amber-100 bg-amber-50/80 p-4 dark:border-amber-500/20 dark:bg-amber-500/10">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-700 dark:text-amber-300">
                       No show
                     </p>
-                    <p className="mt-2 text-3xl font-extrabold text-slate-900">
+                    <p className="mt-2 text-3xl font-extrabold text-slate-900 dark:text-white">
                       {resumenReal.totalNoShow}
                     </p>
                   </div>
@@ -555,86 +555,90 @@ export default function ClienteHistorialPage() {
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
             <div className="space-y-6 xl:col-span-2">
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white">
-                <h3 className="mb-5 text-lg font-bold text-slate-900">
+              <div className="card p-6">
+                <h3 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">
                   Resumen del cliente
                 </h3>
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                    <div className="flex items-center gap-2 text-slate-500">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                       <Clock3 className="h-4 w-4" />
                       <p className="text-sm">Primera visita</p>
                     </div>
-                    <p className="mt-2 text-base font-semibold text-slate-900">
+                    <p className="mt-2 text-base font-semibold text-slate-900 dark:text-white">
                       {formatFecha(
                         resumenReal.primeraVisita || cliente.primera_visita
                       )}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                    <div className="flex items-center gap-2 text-slate-500">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                       <Clock3 className="h-4 w-4" />
                       <p className="text-sm">Última visita</p>
                     </div>
-                    <p className="mt-2 text-base font-semibold text-slate-900">
+                    <p className="mt-2 text-base font-semibold text-slate-900 dark:text-white">
                       {formatFecha(
                         resumenReal.ultimaVisita || cliente.ultima_visita
                       )}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                    <div className="flex items-center gap-2 text-slate-500">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                       <CalendarClock className="h-4 w-4" />
                       <p className="text-sm">Próxima reserva</p>
                     </div>
-                    <p className="mt-2 text-base font-semibold text-slate-900">
+                    <p className="mt-2 text-base font-semibold text-slate-900 dark:text-white">
                       {formatFechaHora(
                         resumenReal.proximaReserva || cliente.proxima_reserva
                       )}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                    <div className="flex items-center gap-2 text-slate-500">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
+                    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                       <Ban className="h-4 w-4" />
                       <p className="text-sm">Canceladas</p>
                     </div>
-                    <p className="mt-2 text-base font-semibold text-slate-900">
+                    <p className="mt-2 text-base font-semibold text-slate-900 dark:text-white">
                       {resumenReal.totalCanceladas}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                    <p className="text-sm text-slate-500">Canal de contacto</p>
-                    <p className="mt-2 text-base font-semibold text-slate-900">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Canal de contacto
+                    </p>
+                    <p className="mt-2 text-base font-semibold text-slate-900 dark:text-white">
                       {formatCanal(cliente.canal_contacto)}
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
-                    <p className="text-sm text-slate-500">Origen principal</p>
-                    <p className="mt-2 text-base font-semibold text-slate-900">
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 dark:border-white/10 dark:bg-white/5">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      Origen principal
+                    </p>
+                    <p className="mt-2 text-base font-semibold text-slate-900 dark:text-white">
                       {cliente.origen_principal || "-"}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white">
+              <div className="card p-6">
                 <div className="mb-5 flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                     Historial de reservas
                   </h3>
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600">
+                  <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
                     {reservas.length} registros
                   </span>
                 </div>
 
                 {reservas.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-10 text-center text-sm text-slate-500">
+                  <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-10 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
                     No hay reservas registradas
                   </div>
                 ) : (
@@ -642,15 +646,15 @@ export default function ClienteHistorialPage() {
                     {reservas.map((reserva) => (
                       <div
                         key={reserva.id}
-                        className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 transition hover:border-slate-300 hover:bg-slate-50"
+                        className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 transition hover:border-slate-300 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
                       >
                         <div className="space-y-3">
                           <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
                             <div>
-                              <p className="font-semibold text-slate-900">
+                              <p className="font-semibold text-slate-900 dark:text-white">
                                 {formatFechaHora(reserva.fecha_hora_reserva)}
                               </p>
-                              <p className="mt-1 text-sm text-slate-500">
+                              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                 {reserva.personas ?? 0} personas
                                 {reserva.turno ? ` · ${reserva.turno}` : ""}
                               </p>
@@ -687,23 +691,29 @@ export default function ClienteHistorialPage() {
                           </div>
 
                           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                            <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm">
-                              <p className="text-slate-500">Origen</p>
-                              <p className="mt-1 font-medium text-slate-900">
+                            <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-white/10 dark:bg-white/5">
+                              <p className="text-slate-500 dark:text-slate-400">
+                                Origen
+                              </p>
+                              <p className="mt-1 font-medium text-slate-900 dark:text-white">
                                 {reserva.origen || "-"}
                               </p>
                             </div>
 
-                            <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm">
-                              <p className="text-slate-500">Mesa</p>
-                              <p className="mt-1 font-medium text-slate-900">
+                            <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-white/10 dark:bg-white/5">
+                              <p className="text-slate-500 dark:text-slate-400">
+                                Mesa
+                              </p>
+                              <p className="mt-1 font-medium text-slate-900 dark:text-white">
                                 {reserva.mesa_id || "-"}
                               </p>
                             </div>
 
-                            <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm">
-                              <p className="text-slate-500">Notas</p>
-                              <p className="mt-1 whitespace-pre-wrap font-medium text-slate-900">
+                            <div className="rounded-xl border border-slate-200 bg-white p-3 text-sm dark:border-white/10 dark:bg-white/5">
+                              <p className="text-slate-500 dark:text-slate-400">
+                                Notas
+                              </p>
+                              <p className="mt-1 whitespace-pre-wrap font-medium text-slate-900 dark:text-white">
                                 {reserva.notas || "-"}
                               </p>
                             </div>
@@ -717,36 +727,36 @@ export default function ClienteHistorialPage() {
             </div>
 
             <div className="space-y-6">
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white">
+              <div className="card p-6">
                 <div className="mb-4 flex items-center gap-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900">
                     <Bell className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-slate-900">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                       Enviar aviso
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       Aparecerá en el panel del cliente
                     </p>
                   </div>
                 </div>
 
                 {errorAviso && (
-                  <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
                     {errorAviso}
                   </div>
                 )}
 
                 {okAviso && (
-                  <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+                  <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
                     {okAviso}
                   </div>
                 )}
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
                       Título
                     </label>
                     <input
@@ -756,13 +766,13 @@ export default function ClienteHistorialPage() {
                         setErrorAviso(null);
                         setOkAviso(null);
                       }}
-                      placeholder="Ej: Mensaje del restaurante"
-                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm text-slate-700 outline-none focus:border-slate-400"
+                      placeholder="Mensaje del restaurante"
+                      className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/70 px-4 py-3 text-sm text-slate-700 outline-none focus:border-slate-400 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-white/20"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    <label className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">
                       Mensaje
                     </label>
                     <textarea
@@ -774,7 +784,7 @@ export default function ClienteHistorialPage() {
                       }}
                       rows={5}
                       placeholder="Escribe el aviso que verá el cliente..."
-                      className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-700 outline-none focus:border-slate-400"
+                      className="mt-1 w-full rounded-lg border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-700 outline-none focus:border-slate-400 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-white/20"
                     />
                   </div>
 
@@ -782,7 +792,7 @@ export default function ClienteHistorialPage() {
                     type="button"
                     onClick={enviarAvisoCliente}
                     disabled={sendingAviso}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60 dark:bg-white dark:text-slate-900"
                   >
                     <Send className="h-4 w-4" />
                     {sendingAviso ? "Enviando..." : "Enviar aviso al cliente"}
@@ -790,14 +800,14 @@ export default function ClienteHistorialPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white">
-                <h3 className="mb-5 text-lg font-bold text-slate-900">
+              <div className="card p-6">
+                <h3 className="mb-5 text-lg font-bold text-slate-900 dark:text-white">
                   Preferencias y permisos
                 </h3>
 
                 <div className="space-y-3 text-sm">
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
-                    <span className="inline-flex items-center gap-2 text-slate-700">
+                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-white/10 dark:bg-white/5">
+                    <span className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-300">
                       <MessageCircle className="h-4 w-4" />
                       Permite WhatsApp
                     </span>
@@ -814,8 +824,8 @@ export default function ClienteHistorialPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
-                    <span className="inline-flex items-center gap-2 text-slate-700">
+                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-white/10 dark:bg-white/5">
+                    <span className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-300">
                       <Mail className="h-4 w-4" />
                       Permite email
                     </span>
@@ -832,8 +842,8 @@ export default function ClienteHistorialPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
-                    <span className="inline-flex items-center gap-2 text-slate-700">
+                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-white/10 dark:bg-white/5">
+                    <span className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-300">
                       <Star className="h-4 w-4" />
                       Ya dejó reseña
                     </span>
@@ -850,41 +860,41 @@ export default function ClienteHistorialPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
-                    <span className="inline-flex items-center gap-2 text-slate-700">
+                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-white/10 dark:bg-white/5">
+                    <span className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-300">
                       <AlertTriangle className="h-4 w-4" />
                       No show
                     </span>
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-slate-900 dark:text-white">
                       {resumenReal.totalNoShow}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
-                    <span className="inline-flex items-center gap-2 text-slate-700">
+                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-white/10 dark:bg-white/5">
+                    <span className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-300">
                       <XCircle className="h-4 w-4" />
                       Cancelaciones
                     </span>
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-slate-900 dark:text-white">
                       {resumenReal.totalCanceladas}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
-                    <span className="inline-flex items-center gap-2 text-slate-700">
+                  <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 dark:border-white/10 dark:bg-white/5">
+                    <span className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-300">
                       <CheckCircle2 className="h-4 w-4" />
                       Visitas reales
                     </span>
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-slate-900 dark:text-white">
                       {resumenReal.totalAtendidas}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white">
+              <div className="card p-6">
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                     Notas internas
                   </h3>
 
@@ -896,7 +906,7 @@ export default function ClienteHistorialPage() {
                         setErrorNotas(null);
                         setOkNotas(null);
                       }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
                     >
                       <Pencil className="h-4 w-4" />
                       Editar
@@ -906,7 +916,7 @@ export default function ClienteHistorialPage() {
                       type="button"
                       onClick={guardarNotasInternas}
                       disabled={savingNotas}
-                      className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60 dark:bg-white dark:text-slate-900"
                     >
                       <Save className="h-4 w-4" />
                       {savingNotas ? "Guardando..." : "Guardar"}
@@ -915,13 +925,13 @@ export default function ClienteHistorialPage() {
                 </div>
 
                 {errorNotas && (
-                  <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
                     {errorNotas}
                   </div>
                 )}
 
                 {okNotas && (
-                  <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+                  <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300">
                     {okNotas}
                   </div>
                 )}
@@ -933,7 +943,7 @@ export default function ClienteHistorialPage() {
                       onChange={(e) => setNotasInternas(e.target.value)}
                       rows={7}
                       placeholder="Escribe aquí notas internas del cliente..."
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-700 outline-none focus:border-slate-400"
+                      className="w-full rounded-lg border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-700 outline-none focus:border-slate-400 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-white/20"
                     />
 
                     <button
@@ -944,13 +954,13 @@ export default function ClienteHistorialPage() {
                         setErrorNotas(null);
                         setOkNotas(null);
                       }}
-                      className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
                     >
                       Cancelar
                     </button>
                   </div>
                 ) : (
-                  <div className="min-h-[140px] rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-600">
+                  <div className="min-h-[140px] rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
                     <p className="whitespace-pre-wrap">
                       {cliente.notas_internas || "Sin notas internas"}
                     </p>

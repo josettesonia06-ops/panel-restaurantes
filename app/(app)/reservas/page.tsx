@@ -55,56 +55,112 @@ function getHoraMadrid() {
   }).format(new Date());
 }
 
-function EstadoBadge({ estado }: { estado: Estado }) {
-  if (estado === "confirmada") {
-    return (
-      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 dark:bg-emerald-300" />
-        Confirmada
-      </span>
-    );
+function normalizarTelefono(valor: string | null | undefined) {
+  const raw = String(valor ?? "").replace(/\D/g, "");
+
+  if (raw.startsWith("34") && raw.length === 11) {
+    return raw.slice(2);
   }
 
-  if (estado === "pendiente") {
-    return (
-      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border border-amber-500/20 bg-amber-500/10 text-amber-800 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-100">
-        <span className="h-1.5 w-1.5 rounded-full bg-amber-600 dark:bg-amber-300" />
-        Pendiente
-      </span>
-    );
-  }
+  return raw;
+}
+
+function EstadoBadge({
+  estado,
+  isDark = false,
+}: {
+  estado: Estado;
+  isDark?: boolean;
+}) {
+  const styles =
+    estado === "confirmada"
+      ? {
+          borderColor: isDark ? "rgba(52,211,153,0.35)" : "#059669",
+          backgroundColor: isDark ? "rgba(16,185,129,0.12)" : "#d1fae5",
+          color: isDark ? "#a7f3d0" : "#064e3b",
+          dot: isDark ? "#6ee7b7" : "#047857",
+          label: "Confirmada",
+        }
+      : estado === "pendiente"
+      ? {
+          borderColor: isDark ? "rgba(251,191,36,0.35)" : "#d97706",
+          backgroundColor: isDark ? "rgba(245,158,11,0.14)" : "#fef3c7",
+          color: isDark ? "#fde68a" : "#78350f",
+          dot: isDark ? "#fcd34d" : "#b45309",
+          label: "Pendiente",
+        }
+      : {
+          borderColor: isDark ? "rgba(251,113,133,0.35)" : "#e11d48",
+          backgroundColor: isDark ? "rgba(244,63,94,0.14)" : "#ffe4e6",
+          color: isDark ? "#fecdd3" : "#881337",
+          dot: isDark ? "#fda4af" : "#be123c",
+          label: "Cancelada",
+        };
 
   return (
-    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs border border-rose-500/20 bg-rose-500/10 text-rose-700 dark:border-rose-400/25 dark:bg-rose-400/10 dark:text-rose-100">
-      <span className="h-1.5 w-1.5 rounded-full bg-rose-600 dark:bg-rose-300" />
-      Cancelada
+    <span
+      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-extrabold"
+      style={{
+        borderColor: styles.borderColor,
+        backgroundColor: styles.backgroundColor,
+        color: styles.color,
+      }}
+    >
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ backgroundColor: styles.dot }}
+      />
+      {styles.label}
     </span>
   );
 }
 
-function AtendidaBadge({ atendida }: { atendida: boolean | null }) {
-  if (atendida === true) {
-    return (
-      <span className="inline-flex items-center gap-2 text-xs px-2 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:text-emerald-200">
-        <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 dark:bg-emerald-300" />
-        Ha venido
-      </span>
-    );
-  }
-
-  if (atendida === false) {
-    return (
-      <span className="inline-flex items-center gap-2 text-xs px-2 py-1 rounded-full border border-rose-500/20 bg-rose-500/10 text-rose-700 dark:border-rose-400/25 dark:bg-rose-400/10 dark:text-rose-100">
-        <span className="h-1.5 w-1.5 rounded-full bg-rose-600 dark:bg-rose-300" />
-        No ha venido
-      </span>
-    );
-  }
+function AtendidaBadge({
+  atendida,
+  isDark = false,
+}: {
+  atendida: boolean | null;
+  isDark?: boolean;
+}) {
+  const styles =
+    atendida === true
+      ? {
+          borderColor: isDark ? "rgba(52,211,153,0.35)" : "#059669",
+          backgroundColor: isDark ? "rgba(16,185,129,0.12)" : "#d1fae5",
+          color: isDark ? "#a7f3d0" : "#064e3b",
+          dot: isDark ? "#6ee7b7" : "#047857",
+          label: "Ha venido",
+        }
+      : atendida === false
+      ? {
+          borderColor: isDark ? "rgba(251,113,133,0.35)" : "#e11d48",
+          backgroundColor: isDark ? "rgba(244,63,94,0.14)" : "#ffe4e6",
+          color: isDark ? "#fecdd3" : "#881337",
+          dot: isDark ? "#fda4af" : "#be123c",
+          label: "No ha venido",
+        }
+      : {
+          borderColor: isDark ? "rgba(255,255,255,0.16)" : "#64748b",
+          backgroundColor: isDark ? "rgba(255,255,255,0.07)" : "#e2e8f0",
+          color: isDark ? "#e2e8f0" : "#0f172a",
+          dot: isDark ? "#cbd5e1" : "#475569",
+          label: "Sin marcar",
+        };
 
   return (
-    <span className="inline-flex items-center gap-2 text-xs px-2 py-1 rounded-full border border-slate-500/15 bg-slate-500/10 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
-      <span className="h-1.5 w-1.5 rounded-full bg-slate-400 dark:bg-slate-300" />
-      Sin marcar
+    <span
+      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-extrabold"
+      style={{
+        borderColor: styles.borderColor,
+        backgroundColor: styles.backgroundColor,
+        color: styles.color,
+      }}
+    >
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ backgroundColor: styles.dot }}
+      />
+      {styles.label}
     </span>
   );
 }
@@ -143,7 +199,8 @@ export default function ReservasPage() {
   const [isDark, setIsDark] = useState(false);
 
   const queryClient = useQueryClient();
-  const { data: restauranteActual, isLoading: loadingRestaurante } = useRestaurante();
+  const { data: restauranteActual, isLoading: loadingRestaurante } =
+    useRestaurante();
 
   useEffect(() => {
     const root = document.documentElement;
@@ -211,22 +268,22 @@ export default function ReservasPage() {
 
   const cargarConfigPuntos = useCallback(async (rid: string) => {
     try {
-const result = await withTimeout(
-  supabase
-    .from("fidelizacion_config")
-    .select("puntos_por_euro")
-    .eq("restaurante_id", rid)
-    .maybeSingle(),
-  20000
-);
+      const result = await withTimeout(
+        supabase
+          .from("fidelizacion_config")
+          .select("puntos_por_euro")
+          .eq("restaurante_id", rid)
+          .maybeSingle(),
+        20000
+      );
 
-if (!result) {
-  setPuntosActivo(false);
-  setPuntosPorEuro(1);
-  return;
-}
+      if (!result) {
+        setPuntosActivo(false);
+        setPuntosPorEuro(1);
+        return;
+      }
 
-const { data, error } = result;
+      const { data, error } = result;
 
       if (error) {
         setPuntosActivo(false);
@@ -267,76 +324,76 @@ const { data, error } = result;
         const hasta = new Date(ahora);
         hasta.setDate(hasta.getDate() + 180);
 
-const result = await withTimeout(
-  supabase
-    .from("reservas")
-    .select(
-      `
-        id,
-        nombre_cliente,
-        cliente_id,
-        telefono,
-        email,
-        restaurante_id,
-        fecha_hora_reserva,
-        personas,
-        estado,
-        atendida,
-        resena_solicitada,
-        clientes:cliente_id (
-          ya_dejo_resena
-        )
-      `
-    )
-    .eq("restaurante_id", restauranteId)
-    .gte("fecha_hora_reserva", desde.toISOString())
-    .lte("fecha_hora_reserva", hasta.toISOString())
-    .order("fecha_hora_reserva", { ascending: true })
-    .limit(300),
-  20000
-);
+        const result = await withTimeout(
+          supabase
+            .from("reservas")
+            .select(
+              `
+                id,
+                nombre_cliente,
+                cliente_id,
+                telefono,
+                email,
+                restaurante_id,
+                fecha_hora_reserva,
+                personas,
+                estado,
+                atendida,
+                resena_solicitada,
+                clientes:cliente_id (
+                  ya_dejo_resena
+                )
+              `
+            )
+            .eq("restaurante_id", restauranteId)
+            .gte("fecha_hora_reserva", desde.toISOString())
+            .lte("fecha_hora_reserva", hasta.toISOString())
+            .order("fecha_hora_reserva", { ascending: true })
+            .limit(300),
+          20000
+        );
 
-if (!result) {
-  setErrorReservas("La carga de reservas ha tardado demasiado.");
-  return;
-}
+        if (!result) {
+          setErrorReservas("La carga de reservas ha tardado demasiado.");
+          return;
+        }
 
-const { data, error } = result;
+        const { data, error } = result;
 
-if (error) {
-  console.warn("RESERVAS ERROR", error);
-  setErrorReservas("No se pudieron cargar las reservas.");
-  return;
-}
+        if (error) {
+          console.warn("RESERVAS ERROR", error);
+          setErrorReservas("No se pudieron cargar las reservas.");
+          return;
+        }
 
-const hoyKey = new Date().toDateString();
+        const hoyKey = new Date().toDateString();
 
-const formateadas: Reserva[] = (data || []).map((r: any) => {
-  const fechaDate = new Date(r.fecha_hora_reserva);
+        const formateadas: Reserva[] = (data || []).map((r: any) => {
+          const fechaDate = new Date(r.fecha_hora_reserva);
 
-  return {
-    id: r.id,
-    cliente: r.nombre_cliente ?? "Cliente",
-    cliente_id: r.cliente_id ?? null,
-    telefono: r.telefono ?? null,
-    email: r.email ?? null,
-    restaurante_id: r.restaurante_id,
-    fecha_hora_reserva: r.fecha_hora_reserva,
-    fecha:
-      fechaDate.toDateString() === hoyKey
-        ? "Hoy"
-        : fechaDate.toLocaleDateString("es-ES"),
-    hora: fechaDate.toLocaleTimeString("es-ES", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    personas: Number(r.personas ?? 0),
-    estado: (r.estado || "pendiente") as Estado,
-    atendida: r.atendida,
-    resena_solicitada: Boolean(r.resena_solicitada),
-    ya_dejo_resena: r.clientes?.ya_dejo_resena ?? false,
-  };
-});
+          return {
+            id: r.id,
+            cliente: r.nombre_cliente ?? "Cliente",
+            cliente_id: r.cliente_id ?? null,
+            telefono: r.telefono ?? null,
+            email: r.email ?? null,
+            restaurante_id: r.restaurante_id,
+            fecha_hora_reserva: r.fecha_hora_reserva,
+            fecha:
+              fechaDate.toDateString() === hoyKey
+                ? "Hoy"
+                : fechaDate.toLocaleDateString("es-ES"),
+            hora: fechaDate.toLocaleTimeString("es-ES", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            personas: Number(r.personas ?? 0),
+            estado: (r.estado || "pendiente") as Estado,
+            atendida: r.atendida,
+            resena_solicitada: Boolean(r.resena_solicitada),
+            ya_dejo_resena: r.clientes?.ya_dejo_resena ?? false,
+          };
+        });
 
         setReservas(formateadas);
         setLastUpdated(`Actualizado ${getHoraMadrid()}`);
@@ -561,33 +618,52 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
       return;
     }
 
-    const { data: clienteExistente } = await supabase
-      .from("clientes")
-      .select("id")
-      .eq("restaurante_id", reserva.restaurante_id)
-      .eq("telefono", reserva.telefono)
-      .maybeSingle();
-
-    let clienteIdFinal = clienteExistente?.id;
+    let clienteIdFinal = reserva.cliente_id;
 
     if (!clienteIdFinal) {
-      const { data: nuevoCliente, error: errNuevo } = await supabase
-        .from("clientes")
-        .insert({
-          restaurante_id: reserva.restaurante_id,
-          nombre: reserva.cliente,
-          telefono: reserva.telefono,
-          visitas_totales: 0,
-        })
-        .select("id")
-        .single();
+      const telefonoSin34 = normalizarTelefono(reserva.telefono);
+      const telefonoCon34 = telefonoSin34 ? `34${telefonoSin34}` : "";
 
-      if (errNuevo || !nuevoCliente) {
+      const { data: clientesExistentes, error: errorClienteExistente } =
+        await supabase
+          .from("clientes")
+          .select("id")
+          .eq("restaurante_id", reserva.restaurante_id)
+          .or(`telefono.eq.${telefonoSin34},telefono.eq.${telefonoCon34}`)
+          .limit(1);
+
+      if (errorClienteExistente) {
         setProcesando(null);
         return;
       }
 
-      clienteIdFinal = nuevoCliente.id;
+      clienteIdFinal = clientesExistentes?.[0]?.id ?? null;
+
+      if (!clienteIdFinal) {
+        const { data: nuevoCliente, error: errNuevo } = await supabase
+          .from("clientes")
+          .insert({
+            restaurante_id: reserva.restaurante_id,
+            nombre: reserva.cliente || "Cliente",
+            telefono: telefonoSin34 || reserva.telefono,
+            visitas_totales: 0,
+          })
+          .select("id")
+          .single();
+
+        if (errNuevo || !nuevoCliente) {
+          setProcesando(null);
+          return;
+        }
+
+        clienteIdFinal = nuevoCliente.id;
+      }
+
+      await supabase
+        .from("reservas")
+        .update({ cliente_id: clienteIdFinal })
+        .eq("id", reserva.id)
+        .eq("restaurante_id", reserva.restaurante_id);
     }
 
     const gastoValido =
@@ -638,12 +714,16 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
     });
 
     setReservas((prev) =>
-      prev.map((r) => (r.id === reserva.id ? { ...r, atendida: true } : r))
+      prev.map((r) =>
+        r.id === reserva.id
+          ? { ...r, atendida: true, cliente_id: clienteIdFinal }
+          : r
+      )
     );
 
     if (reservaSeleccionada?.id === reserva.id) {
       setReservaSeleccionada((prev) =>
-        prev ? { ...prev, atendida: true } : prev
+        prev ? { ...prev, atendida: true, cliente_id: clienteIdFinal } : prev
       );
     }
 
@@ -656,7 +736,7 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
         cliente_id: clienteIdFinal,
         email: reserva.email,
         nombre: reserva.cliente,
-        telefono: reserva.telefono,
+        telefono: normalizarTelefono(reserva.telefono) || reserva.telefono,
         resena_solicitada: reserva.resena_solicitada,
         ya_dejo_resena: reserva.ya_dejo_resena,
         gasto_eur: gastoValido ? gastoEur : null,
@@ -748,16 +828,16 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
       "cursor-pointer",
       "select-none",
       "overflow-hidden",
-      "!text-slate-900",
+      "!text-slate-950",
       "dark:!text-white",
     ];
 
     if (estado === "cancelada") {
       return [
         ...base,
-        "!border-rose-200",
+        "!border-rose-300",
         "dark:!border-rose-400/30",
-        "!bg-rose-50",
+        "!bg-rose-100",
         "dark:!bg-rose-400/10",
       ];
     }
@@ -765,9 +845,9 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
     if (estado === "pendiente") {
       return [
         ...base,
-        "!border-amber-200",
+        "!border-amber-300",
         "dark:!border-amber-400/30",
-        "!bg-amber-50",
+        "!bg-amber-100",
         "dark:!bg-amber-400/10",
       ];
     }
@@ -775,18 +855,18 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
     if (atendida === true) {
       return [
         ...base,
-        "!border-emerald-200",
+        "!border-emerald-300",
         "dark:!border-emerald-400/30",
-        "!bg-emerald-50",
+        "!bg-emerald-100",
         "dark:!bg-emerald-400/10",
       ];
     }
 
     return [
       ...base,
-      "!border-sky-200",
+      "!border-sky-300",
       "dark:!border-sky-400/30",
-      "!bg-sky-50",
+      "!bg-sky-100",
       "dark:!bg-sky-400/10",
     ];
   };
@@ -802,14 +882,14 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
 
     const dotClass =
       estado === "cancelada"
-        ? "bg-rose-500 dark:bg-rose-300"
+        ? "bg-rose-700 dark:bg-rose-300"
         : estado === "pendiente"
-        ? "bg-amber-500 dark:bg-amber-300"
+        ? "bg-amber-700 dark:bg-amber-300"
         : atendida === true
-        ? "bg-emerald-500 dark:bg-emerald-300"
-        : "bg-sky-500 dark:bg-sky-300";
+        ? "bg-emerald-700 dark:bg-emerald-300"
+        : "bg-sky-700 dark:bg-sky-300";
 
-    const txt = isDark ? "#f8fafc" : "#0f172a";
+    const txt = isDark ? "#f8fafc" : "#020617";
 
     return (
       <div className="px-2 py-1.5 min-w-0" style={{ color: txt }}>
@@ -817,14 +897,14 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
           <span className={`h-1.5 w-1.5 rounded-full ${dotClass}`} />
           {arg.timeText ? (
             <span
-              className="shrink-0 text-[11px] font-semibold"
+              className="shrink-0 text-[11px] font-bold"
               style={{ color: txt }}
             >
               {arg.timeText}
             </span>
           ) : null}
           <span
-            className="truncate text-[11px] font-medium"
+            className="truncate text-[11px] font-semibold"
             style={{ color: txt }}
           >
             {arg.event.title}
@@ -1011,7 +1091,7 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
               slotMinTime="08:00:00"
               slotMaxTime="24:00:00"
               allDaySlot={false}
-              eventTextColor={isDark ? "#f8fafc" : "#0f172a"}
+              eventTextColor={isDark ? "#f8fafc" : "#020617"}
               eventClick={(info) => abrirDetalleReserva(info.event.id)}
               eventDidMount={(info) => {
                 const color = isDark ? "#f8fafc" : "#0f172a";
@@ -1110,7 +1190,7 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
                     <td className="px-6 py-4">{r.personas}</td>
 
                     <td className="px-6 py-4">
-                      <EstadoBadge estado={r.estado} />
+                      <EstadoBadge estado={r.estado} isDark={isDark} />
                     </td>
 
                     <td className="px-6 py-4">
@@ -1167,7 +1247,7 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
                       )}
 
                       {r.atendida !== null && (
-                        <AtendidaBadge atendida={r.atendida} />
+                        <AtendidaBadge atendida={r.atendida} isDark={isDark} />
                       )}
                     </td>
                   </tr>
@@ -1227,16 +1307,7 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
                       reservaSeleccionada.fecha_hora_reserva
                     ).toLocaleString("es-ES")}
                   </span>
-                  <span
-                    className="text-xs"
-                    style={{
-                      color: isDark
-                        ? "rgba(148,163,184,1)"
-                        : "rgba(148,163,184,1)",
-                    }}
-                  >
-                    •
-                  </span>
+                  <span className="text-xs text-slate-400">•</span>
                   <span
                     className="text-xs"
                     style={{
@@ -1251,8 +1322,14 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
                 </div>
 
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <EstadoBadge estado={reservaSeleccionada.estado} />
-                  <AtendidaBadge atendida={reservaSeleccionada.atendida} />
+                  <EstadoBadge
+                    estado={reservaSeleccionada.estado}
+                    isDark={isDark}
+                  />
+                  <AtendidaBadge
+                    atendida={reservaSeleccionada.atendida}
+                    isDark={isDark}
+                  />
                 </div>
               </div>
 
@@ -1291,14 +1368,7 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
                     : "rgba(2,6,23,0.12)",
                 }}
               >
-                <div
-                  className="text-xs"
-                  style={{
-                    color: isDark
-                      ? "rgba(226,232,240,0.75)"
-                      : "rgba(100,116,139,1)",
-                  }}
-                >
+                <div className="text-xs text-slate-500 dark:text-slate-300">
                   Teléfono
                 </div>
                 <div
@@ -1320,14 +1390,7 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
                     : "rgba(2,6,23,0.12)",
                 }}
               >
-                <div
-                  className="text-xs"
-                  style={{
-                    color: isDark
-                      ? "rgba(226,232,240,0.75)"
-                      : "rgba(100,116,139,1)",
-                  }}
-                >
+                <div className="text-xs text-slate-500 dark:text-slate-300">
                   Email
                 </div>
                 <div
@@ -1351,14 +1414,7 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
                     : "rgba(2,6,23,0.12)",
                 }}
               >
-                <div
-                  className="text-xs"
-                  style={{
-                    color: isDark
-                      ? "rgba(226,232,240,0.75)"
-                      : "rgba(100,116,139,1)",
-                  }}
-                >
+                <div className="text-xs text-slate-500 dark:text-slate-300">
                   Acciones
                 </div>
 
@@ -1443,14 +1499,7 @@ const formateadas: Reserva[] = (data || []).map((r: any) => {
                 </div>
               </div>
 
-              <div
-                className="text-xs"
-                style={{
-                  color: isDark
-                    ? "rgba(226,232,240,0.75)"
-                    : "rgba(100,116,139,1)",
-                }}
-              >
+              <div className="text-xs text-slate-500 dark:text-slate-300">
                 Esto mantiene la lógica actual de reservas, puntos y webhooks.
               </div>
             </div>

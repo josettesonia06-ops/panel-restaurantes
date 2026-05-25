@@ -69,11 +69,22 @@ export default function AddReservaModal({
     onClose();
   };
 
+  const normalizarTelefono = (valor: string) => {
+    const soloNumeros = valor.replace(/\D/g, "");
+
+    if (soloNumeros.startsWith("34") && soloNumeros.length === 11) {
+      return soloNumeros.slice(2);
+    }
+
+    return soloNumeros;
+  };
+
   const guardar = async () => {
     if (loading) return;
 
     const nombreLimpio = nombre.trim();
-    const telefonoLimpio = telefono.trim();
+    const telefonoLimpio = normalizarTelefono(telefono);
+    const telefonoCon34 = telefonoLimpio ? `34${telefonoLimpio}` : "";
 
     if (!restauranteId) {
       alert("El restaurante aún se está cargando.");
@@ -88,13 +99,13 @@ export default function AddReservaModal({
     setLoading(true);
 
     try {
-      const { data: clienteExistente, error: errorClienteExistente } =
+      const { data: clientesExistentes, error: errorClienteExistente } =
         await supabase
           .from("clientes")
-          .select("id")
-          .eq("telefono", telefonoLimpio)
+          .select("id, telefono")
           .eq("restaurante_id", restauranteId)
-          .maybeSingle();
+          .or(`telefono.eq.${telefonoLimpio},telefono.eq.${telefonoCon34}`)
+          .limit(1);
 
       if (errorClienteExistente) {
         console.error("Error buscando cliente:", errorClienteExistente);
@@ -102,7 +113,7 @@ export default function AddReservaModal({
         return;
       }
 
-      let clienteId = clienteExistente?.id ?? null;
+      let clienteId = clientesExistentes?.[0]?.id ?? null;
 
       if (!clienteId) {
         const { data: nuevoCliente, error: errorNuevoCliente } = await supabase

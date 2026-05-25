@@ -67,35 +67,41 @@ function badgeTipoClasses(tipo: string) {
   if (tipo === "Frecuente") {
     return "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-300";
   }
+
   if (tipo === "Habitual") {
     return "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300";
   }
+
   return "border-slate-200 bg-slate-100 text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300";
 }
 
 export default function ClientesPage() {
   const [clientes, setClientes] = useState<ClienteResumen[]>([]);
-  const [clientesFiltrados, setClientesFiltrados] = useState<ClienteResumen[]>([]);
+  const [clientesFiltrados, setClientesFiltrados] = useState<ClienteResumen[]>(
+    []
+  );
   const [showModal, setShowModal] = useState(false);
   const [restauranteId, setRestauranteId] = useState<string | null>(null);
   const [isDark, setIsDark] = useState(false);
   const [busqueda, setBusqueda] = useState("");
 
   const [showAddVisita, setShowAddVisita] = useState(false);
-  const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(null);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(
+    null
+  );
 
   const [nombre, setNombre] = useState("");
   const [fecha, setFecha] = useState("");
   const [personas, setPersonas] = useState("");
 
   useEffect(() => {
-    const read = () =>
-      setIsDark(document.documentElement.classList.contains("dark"));
+    const root = document.documentElement;
+    const read = () => setIsDark(root.classList.contains("dark"));
 
     read();
 
     const obs = new MutationObserver(read);
-    obs.observe(document.documentElement, {
+    obs.observe(root, {
       attributes: true,
       attributeFilter: ["class"],
     });
@@ -226,7 +232,8 @@ export default function ClientesPage() {
   };
 
   const totalClientes = clientes.length;
-  const frecuentes = clientes.filter((c) => (c.visitas_totales ?? 0) >= 5).length;
+  const frecuentes = clientes.filter((c) => (c.visitas_totales ?? 0) >= 5)
+    .length;
   const nuevos = clientes.filter((c) => (c.visitas_totales ?? 0) <= 1).length;
 
   return (
@@ -248,13 +255,13 @@ export default function ClientesPage() {
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               placeholder="Buscar por nombre, teléfono o email"
-              className="w-full rounded-2xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 transition focus:border-slate-300 focus:ring-4 focus:ring-slate-100 dark:border-white/10 dark:bg-[#071224] dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-white/15 dark:focus:ring-white/10"
+              className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none placeholder:text-slate-400 transition focus:border-slate-300 focus:ring-4 focus:ring-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-white/15 dark:focus:ring-white/10"
             />
           </div>
 
           <button
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:border-white/15 dark:bg-transparent dark:hover:bg-white/5"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-white dark:text-slate-900"
           >
             <Plus size={16} />
             Añadir cliente
@@ -263,81 +270,138 @@ export default function ClientesPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-        <div className="rounded-3xl border border-blue-100 bg-blue-50/80 p-5 shadow-sm dark:border-blue-500/20 dark:bg-slate-200">
+        <div className="rounded-3xl border border-blue-100 bg-blue-50/80 p-5 shadow-sm dark:border-blue-500/20 dark:bg-blue-500/10">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-700">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-700 dark:text-blue-300">
               Total clientes
             </p>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-blue-700 shadow-sm dark:bg-white/80">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-blue-700 shadow-sm dark:bg-blue-500/15 dark:text-blue-300">
               <Users className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-4 text-4xl font-extrabold text-slate-900">{totalClientes}</p>
+          <p className="mt-4 text-4xl font-extrabold text-slate-900 dark:text-white">
+            {totalClientes}
+          </p>
         </div>
 
-        <div className="rounded-3xl border border-emerald-100 bg-emerald-50/80 p-5 shadow-sm dark:border-emerald-500/20 dark:bg-[#dbe8e3]">
+        <div className="rounded-3xl border border-emerald-100 bg-emerald-50/80 p-5 shadow-sm dark:border-emerald-500/20 dark:bg-emerald-500/10">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-700">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
               Frecuentes
             </p>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-emerald-700 shadow-sm dark:bg-white/80">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-emerald-700 shadow-sm dark:bg-emerald-500/15 dark:text-emerald-300">
               <Repeat2 className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-4 text-4xl font-extrabold text-slate-900">{frecuentes}</p>
+          <p className="mt-4 text-4xl font-extrabold text-slate-900 dark:text-white">
+            {frecuentes}
+          </p>
         </div>
 
-        <div className="rounded-3xl border border-violet-100 bg-violet-50/80 p-5 shadow-sm dark:border-violet-500/20 dark:bg-[#e9e5f2]">
+        <div className="rounded-3xl border border-violet-100 bg-violet-50/80 p-5 shadow-sm dark:border-violet-500/20 dark:bg-violet-500/10">
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-700">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-700 dark:text-violet-300">
               Nuevos
             </p>
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-violet-700 shadow-sm dark:bg-white/80">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-violet-700 shadow-sm dark:bg-violet-500/15 dark:text-violet-300">
               <Sparkles className="h-5 w-5" />
             </div>
           </div>
-          <p className="mt-4 text-4xl font-extrabold text-slate-900">{nuevos}</p>
+          <p className="mt-4 text-4xl font-extrabold text-slate-900 dark:text-white">
+            {nuevos}
+          </p>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-white">
-        <div className="border-b border-slate-200 bg-slate-50/70 px-5 py-4">
-          <h2 className="text-base font-bold text-slate-900">Lista de clientes</h2>
-          <p className="text-sm text-slate-500">{clientesFiltrados.length} resultados</p>
+      <div className="card overflow-hidden">
+        <div className="border-b border-slate-200/70 bg-white/70 px-5 py-4 backdrop-blur dark:border-white/10 dark:bg-white/5">
+          <h2 className="text-base font-bold text-slate-900 dark:text-white">
+            Lista de clientes
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-300">
+            {clientesFiltrados.length} resultados
+          </p>
         </div>
 
-        <div className="overflow-x-auto">
+        <div
+          className="overflow-x-auto clientes-table"
+          style={{
+            ["--tbl-text" as any]: isDark
+              ? "rgba(248,250,252,1)"
+              : "rgba(15,23,42,1)",
+            ["--tbl-muted" as any]: isDark
+              ? "rgba(203,213,225,1)"
+              : "rgba(71,85,105,1)",
+            ["--tbl-head" as any]: isDark
+              ? "rgba(226,232,240,1)"
+              : "rgba(51,65,85,1)",
+            ["--tbl-border" as any]: isDark
+              ? "rgba(255,255,255,0.10)"
+              : "rgba(2,6,23,0.12)",
+            ["--tbl-hover" as any]: isDark
+              ? "rgba(255,255,255,0.05)"
+              : "rgba(248,250,252,0.85)",
+          }}
+        >
+          <style jsx>{`
+            .clientes-table table {
+              border-collapse: collapse !important;
+            }
+
+            .clientes-table table,
+            .clientes-table tbody,
+            .clientes-table td {
+              color: var(--tbl-text) !important;
+            }
+
+            .clientes-table thead th {
+              color: var(--tbl-head) !important;
+            }
+
+            .clientes-table tbody td {
+              border-bottom: 1px solid var(--tbl-border) !important;
+            }
+
+            .clientes-table tbody tr:hover {
+              background: var(--tbl-hover) !important;
+            }
+
+            .clientes-table tbody tr:last-child td {
+              border-bottom: 0 !important;
+            }
+          `}</style>
+
           <table className="w-full min-w-[1150px] text-sm">
-            <thead className="bg-slate-50/80">
-              <tr className="border-b border-slate-200">
-                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+            <thead className="border-b border-slate-200/70 bg-white/70 backdrop-blur dark:border-white/10 dark:bg-white/5">
+              <tr>
+                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em]">
                   Cliente
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em]">
                   Tipo
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em]">
                   Visitas
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em]">
                   Reservas
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em]">
                   Canceladas
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em]">
                   Atendidas
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em]">
                   Puntos
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em]">
                   Próxima reserva
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em]">
                   Última visita
                 </th>
-                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-[0.12em]">
                   Acciones
                 </th>
               </tr>
@@ -349,16 +413,17 @@ export default function ClientesPage() {
                 const tipo = getTipo(visitas);
 
                 return (
-                  <tr
-                    key={c.id}
-                    className="border-b border-slate-100 transition hover:bg-slate-50/80"
-                  >
+                  <tr key={c.id}>
                     <td className="px-5 py-4">
                       <div className="flex flex-col gap-1">
-                        <span className="font-semibold text-slate-900">
+                        <span className="font-semibold">
                           {c.nombre || "Cliente sin nombre"}
                         </span>
-                        <span className="text-xs text-slate-500">
+
+                        <span
+                          className="text-xs"
+                          style={{ color: "var(--tbl-muted)" }}
+                        >
                           {c.telefono || c.email || "Sin contacto"}
                         </span>
 
@@ -367,7 +432,7 @@ export default function ClientesPage() {
                             {c.etiquetas.map((tag) => (
                               <span
                                 key={tag}
-                                className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700"
+                                className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
                               >
                                 {tag}
                               </span>
@@ -387,15 +452,29 @@ export default function ClientesPage() {
                       </span>
                     </td>
 
-                    <td className="px-4 py-4 font-semibold text-slate-900">{visitas}</td>
-                    <td className="px-4 py-4 text-slate-700">{c.total_reservas ?? 0}</td>
-                    <td className="px-4 py-4 text-slate-700">{c.total_canceladas_reales ?? 0}</td>
-                    <td className="px-4 py-4 text-slate-700">{c.total_atendidas ?? 0}</td>
-                    <td className="px-4 py-4 font-medium text-slate-800">{c.puntos_totales ?? 0}</td>
-                    <td className="px-4 py-4 text-slate-600">
-                      {c.proxima_reserva ? formatFechaHora(c.proxima_reserva) : "-"}
+                    <td className="px-4 py-4 font-semibold">{visitas}</td>
+                    <td className="px-4 py-4">{c.total_reservas ?? 0}</td>
+                    <td className="px-4 py-4">
+                      {c.total_canceladas_reales ?? 0}
                     </td>
-                    <td className="px-4 py-4 text-slate-600">
+                    <td className="px-4 py-4">{c.total_atendidas ?? 0}</td>
+                    <td className="px-4 py-4 font-medium">
+                      {c.puntos_totales ?? 0}
+                    </td>
+
+                    <td
+                      className="px-4 py-4"
+                      style={{ color: "var(--tbl-muted)" }}
+                    >
+                      {c.proxima_reserva
+                        ? formatFechaHora(c.proxima_reserva)
+                        : "-"}
+                    </td>
+
+                    <td
+                      className="px-4 py-4"
+                      style={{ color: "var(--tbl-muted)" }}
+                    >
                       {formatFechaRelativa(c.ultima_visita)}
                     </td>
 
@@ -406,14 +485,14 @@ export default function ClientesPage() {
                             setClienteSeleccionado(c.id);
                             setShowAddVisita(true);
                           }}
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+                          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
                         >
                           + Visita
                         </button>
 
                         <Link
                           href={`/clientes/${c.id}`}
-                          className="rounded-xl border border-slate-900 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800"
+                          className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-white dark:text-slate-900"
                         >
                           Ver ficha
                         </Link>
@@ -425,7 +504,10 @@ export default function ClientesPage() {
 
               {clientesFiltrados.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="px-4 py-14 text-center text-sm text-slate-500">
+                  <td
+                    colSpan={10}
+                    className="px-4 py-14 text-center text-sm text-slate-500 dark:text-slate-300"
+                  >
                     No hay clientes para mostrar
                   </td>
                 </tr>
@@ -438,13 +520,15 @@ export default function ClientesPage() {
       {showModal && (
         <div
           className={`fixed inset-0 z-50 flex items-center justify-center ${
-            isDark ? "bg-black/55 backdrop-blur-sm" : "bg-slate-900/25 backdrop-blur-[2px]"
+            isDark
+              ? "bg-black/60 backdrop-blur-sm"
+              : "bg-slate-900/25 backdrop-blur-[2px]"
           }`}
         >
           <div
             className={`w-full max-w-md space-y-4 rounded-3xl border p-6 shadow-xl ${
               isDark
-                ? "border-white/10 bg-white text-slate-900"
+                ? "border-white/10 bg-slate-950 text-slate-100"
                 : "border-slate-200 bg-white text-slate-900"
             }`}
           >
@@ -452,14 +536,14 @@ export default function ClientesPage() {
               <h2 className="text-lg font-bold">Añadir cliente</h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="rounded-xl p-2 opacity-70 transition hover:bg-slate-100 hover:opacity-100"
+                className="rounded-xl p-2 opacity-70 transition hover:bg-slate-100 hover:opacity-100 dark:hover:bg-white/10"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <input
-              className="w-full rounded-2xl border border-slate-300 bg-white p-2.5 text-sm text-slate-900 outline-none"
+              className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-400 dark:focus:ring-white/10"
               placeholder="Nombre del cliente"
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
@@ -467,14 +551,14 @@ export default function ClientesPage() {
 
             <input
               type="date"
-              className="w-full rounded-2xl border border-slate-300 bg-white p-2.5 text-sm text-slate-900 outline-none"
+              className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:ring-white/10"
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
             />
 
             <input
               type="number"
-              className="w-full rounded-2xl border border-slate-300 bg-white p-2.5 text-sm text-slate-900 outline-none"
+              className="w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm text-slate-900 outline-none transition focus:ring-2 focus:ring-slate-200 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-400 dark:focus:ring-white/10"
               placeholder="Personas (opcional)"
               value={personas}
               onChange={(e) => setPersonas(e.target.value)}
@@ -482,7 +566,7 @@ export default function ClientesPage() {
 
             <button
               onClick={añadirCliente}
-              className="w-full rounded-2xl bg-slate-900 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800"
+              className="w-full rounded-lg bg-slate-900 py-2.5 text-sm font-bold text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-900"
             >
               Guardar cliente
             </button>

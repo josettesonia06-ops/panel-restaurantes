@@ -362,6 +362,7 @@ function TopAppHeader({
   donutTop,
   donutBottom,
   avisosSinLeer,
+  fidelizacionActiva,
 }: {
   restauranteNombre: string;
   clienteNombre: string;
@@ -372,6 +373,7 @@ function TopAppHeader({
   donutTop: string;
   donutBottom: string;
   avisosSinLeer: number;
+  fidelizacionActiva: boolean;
 }) {
   return (
     <header
@@ -419,12 +421,18 @@ function TopAppHeader({
             <Sparkles className="mr-1.5 h-3.5 w-3.5" />
             App cliente
           </div>
-          <div className="mt-5 text-sm font-bold text-white/70">Próximo objetivo</div>
+          <div className="mt-5 text-sm font-bold text-white/70">{fidelizacionActiva ? "Próximo objetivo" : "Panel activo"}</div>
           <div className="mt-1 text-xl font-black tracking-[-0.04em] text-white">{donutTop}</div>
           <div className="mt-1 max-w-[220px] text-sm font-semibold text-white/70">{donutBottom}</div>
         </div>
 
-        <ScoreRing pct={donutPct} points={puntos} />
+        {fidelizacionActiva ? (
+          <ScoreRing pct={donutPct} points={puntos} />
+        ) : (
+          <div className="flex h-[112px] w-[112px] shrink-0 items-center justify-center rounded-[34px] border border-white/20 bg-white/12 text-white backdrop-blur">
+            <CalendarDays className="h-11 w-11" />
+          </div>
+        )}
       </div>
     </header>
   );
@@ -461,24 +469,30 @@ function BottomNav({
   buildTabHref,
   avisosSinLeer,
   accent,
+  fidelizacionActiva,
 }: {
   currentTab: TabKey;
   buildTabHref: (tab: TabKey) => string;
   avisosSinLeer: number;
   accent: string;
+  fidelizacionActiva: boolean;
 }) {
   const items: Array<{ key: TabKey; label: string; icon: React.ReactNode; count?: number }> = [
     { key: "inicio", label: "Inicio", icon: <Home className="h-5 w-5" /> },
     { key: "reservas", label: "Reservas", icon: <CalendarDays className="h-5 w-5" /> },
-    { key: "premios", label: "Premios", icon: <Gift className="h-5 w-5" /> },
-    { key: "cupones", label: "Cupones", icon: <TicketPercent className="h-5 w-5" /> },
+    ...(fidelizacionActiva
+      ? [
+          { key: "premios" as TabKey, label: "Premios", icon: <Gift className="h-5 w-5" /> },
+          { key: "cupones" as TabKey, label: "Cupones", icon: <TicketPercent className="h-5 w-5" /> },
+        ]
+      : []),
     { key: "perfil", label: "Perfil", icon: <User className="h-5 w-5" />, count: avisosSinLeer },
   ];
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-[560px] px-4 pb-4">
       <div className="rounded-[28px] border border-white/80 bg-white/88 px-2 py-2 shadow-[0_20px_70px_rgba(15,23,42,0.18)] backdrop-blur-xl">
-        <div className="grid grid-cols-5 gap-1">
+        <div className={clsx("grid gap-1", fidelizacionActiva ? "grid-cols-5" : "grid-cols-3")}>
           {items.map((item) => {
             const active = currentTab === item.key;
 
@@ -555,6 +569,7 @@ function ReservaCard({
   token,
   whatsappHref,
   canCancel,
+  canChange,
   cancelarReservaAction,
   featured = false,
 }: {
@@ -563,6 +578,7 @@ function ReservaCard({
   token: string;
   whatsappHref: string | null;
   canCancel: boolean;
+  canChange: boolean;
   cancelarReservaAction: (formData: FormData) => Promise<void>;
   featured?: boolean;
 }) {
@@ -593,13 +609,24 @@ function ReservaCard({
       </div>
 
       <div className="mt-5 grid grid-cols-2 gap-2">
-        <a
-          href={`/c/${token}?tab=reservas&cambiar=${reserva.id}`}
-          className="inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-black text-white shadow-sm transition"
-          style={{ backgroundColor: accent }}
-        >
-          Cambiar hora
-        </a>
+        {canChange ? (
+          <a
+            href={`/c/${token}?tab=reservas&cambiar=${reserva.id}`}
+            className="inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-black text-white shadow-sm transition"
+            style={{ backgroundColor: accent }}
+          >
+            Cambiar hora
+          </a>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="inline-flex w-full items-center justify-center rounded-2xl bg-slate-100 px-4 py-3 text-sm font-black text-slate-400"
+            title="Solo se puede cambiar la hora si faltan más de 3 horas"
+          >
+            Cambiar hora
+          </button>
+        )}
 
         {canCancel ? (
           <ConfirmSubmit message="¿Seguro que quieres cancelar esta reserva?">
@@ -624,7 +651,7 @@ function ReservaCard({
           <ChevronRight className="h-4 w-4 transition group-open:rotate-90" />
         </summary>
         <p className="mt-2">
-          Puedes cambiar la hora o cancelar la reserva directamente desde el panel.
+Puedes cambiar la hora o cancelar la reserva desde el panel solo si faltan más de 3 horas.
         </p>
       </details>
     </div>
@@ -862,6 +889,14 @@ export default async function ClientePremiosPage({
     const { data: cliente } = await admin.from("clientes").select("id,restaurante_id,public_token").eq("public_token", tokenLocal).maybeSingle();
     if (!cliente) redirect(`/c/${tokenLocal}?tab=premios&err=cliente`);
 
+    const { data: restauranteCfg } = await admin
+      .from("restaurantes")
+      .select("puntos_activo,puntos_por_euro")
+      .eq("id", cliente.restaurante_id)
+      .maybeSingle();
+    const fidelizacionOk = Boolean((restauranteCfg as any)?.puntos_activo) && Number((restauranteCfg as any)?.puntos_por_euro ?? 0) > 0;
+    if (!fidelizacionOk) redirect(`/c/${tokenLocal}?tab=inicio&err=premio`);
+
     const { error } = await admin.rpc("rpc_canjear_premio", {
       p_cliente_id: cliente.id,
       p_restaurante_id: cliente.restaurante_id,
@@ -884,6 +919,14 @@ export default async function ClientePremiosPage({
     const admin = getAdmin();
     const { data: cliente } = await admin.from("clientes").select("id, restaurante_id, public_token").eq("public_token", tokenLocal).maybeSingle();
     if (!cliente) redirect(`/c/${tokenLocal}?tab=cupones&err=cliente`);
+
+    const { data: restauranteCfg } = await admin
+      .from("restaurantes")
+      .select("puntos_activo,puntos_por_euro")
+      .eq("id", cliente.restaurante_id)
+      .maybeSingle();
+    const fidelizacionOk = Boolean((restauranteCfg as any)?.puntos_activo) && Number((restauranteCfg as any)?.puntos_por_euro ?? 0) > 0;
+    if (!fidelizacionOk) redirect(`/c/${tokenLocal}?tab=inicio&err=premio`);
 
     const { data: cupon } = await admin.from("cupones").select("id, restaurante_id, activo").eq("id", cuponId).maybeSingle();
     if (!cupon || cupon.restaurante_id !== cliente.restaurante_id || !cupon.activo) redirect(`/c/${tokenLocal}?tab=cupones&err=premio`);
@@ -926,6 +969,21 @@ export default async function ClientePremiosPage({
     if (!tokenLocal || !reservaId) {
       redirect(`/c/${tokenLocal || token}?tab=reservas&err=cancel`);
     }
+
+    const admin = getAdmin();
+    const { data: cliente } = await admin.from("clientes").select("id, restaurante_id").eq("public_token", tokenLocal).maybeSingle();
+    if (!cliente) redirect(`/c/${tokenLocal}?tab=reservas&err=cliente`);
+
+    const { data: reserva } = await admin
+      .from("reservas")
+      .select("id,fecha_hora_reserva,estado,cliente_id,restaurante_id")
+      .eq("id", reservaId)
+      .eq("cliente_id", cliente.id)
+      .eq("restaurante_id", cliente.restaurante_id)
+      .maybeSingle();
+
+    if (!reserva) redirect(`/c/${tokenLocal}?tab=reservas&err=reserva`);
+    if (!canCancelReserva(reserva as ReservaCliente)) redirect(`/c/${tokenLocal}?tab=reservas&err=cancel_tarde`);
 
     let ok = false;
     let errorMsg = "";
@@ -978,6 +1036,21 @@ export default async function ClientePremiosPage({
     if (!tokenLocal || !reservaId || !nuevaFecha || !nuevaHora) {
       redirect(`/c/${tokenLocal || token}?tab=reservas&err=reprogramar`);
     }
+
+    const admin = getAdmin();
+    const { data: cliente } = await admin.from("clientes").select("id, restaurante_id").eq("public_token", tokenLocal).maybeSingle();
+    if (!cliente) redirect(`/c/${tokenLocal}?tab=reservas&err=cliente`);
+
+    const { data: reserva } = await admin
+      .from("reservas")
+      .select("id,fecha_hora_reserva,estado,cliente_id,restaurante_id")
+      .eq("id", reservaId)
+      .eq("cliente_id", cliente.id)
+      .eq("restaurante_id", cliente.restaurante_id)
+      .maybeSingle();
+
+    if (!reserva) redirect(`/c/${tokenLocal}?tab=reservas&err=reserva`);
+    if (!canCancelReserva(reserva as ReservaCliente)) redirect(`/c/${tokenLocal}?tab=reservas&err=cancel_tarde`);
 
     let ok = false;
     let errorMsg = "";
@@ -1111,7 +1184,12 @@ export default async function ClientePremiosPage({
   const logo = restaurante?.logo_url ?? null;
   const restauranteTelefono = normalizePhone(restaurante?.telefono);
   const puntosPorEuro = Number(restaurante?.puntos_por_euro ?? 0);
-  const puntosActivo = Boolean(restaurante?.puntos_activo ?? puntosPorEuro > 0);
+  const fidelizacionActiva = Boolean(restaurante?.puntos_activo) && puntosPorEuro > 0;
+  const puntosActivo = fidelizacionActiva;
+
+  if (!fidelizacionActiva && (currentTab === "premios" || currentTab === "cupones")) {
+    redirect(`/c/${token}?tab=inicio`);
+  }
 
   function buildWhatsAppReprogramar(reserva: ReservaCliente) {
     if (!restauranteTelefono) return null;
@@ -1122,21 +1200,31 @@ export default async function ClientePremiosPage({
     return `https://wa.me/${restauranteTelefono}?text=${encodeURIComponent(msg)}`;
   }
 
-  const { data: saldo } = await supabase.from("puntos_saldos").select("puntos").eq("cliente_id", cliente.id).eq("restaurante_id", cliente.restaurante_id).maybeSingle();
-  const puntos = Number((saldo as any)?.puntos ?? 0);
+  const { data: saldo } = fidelizacionActiva
+    ? await supabase.from("puntos_saldos").select("puntos").eq("cliente_id", cliente.id).eq("restaurante_id", cliente.restaurante_id).maybeSingle()
+    : { data: null as any };
+  const puntos = fidelizacionActiva ? Number((saldo as any)?.puntos ?? 0) : 0;
 
-  const { data: premiosRaw } = await supabase.from("premios_puntos").select("id,nombre,descripcion,puntos_requeridos,imagen_url,activo,creado_en").eq("restaurante_id", cliente.restaurante_id).eq("activo", true).order("puntos_requeridos", { ascending: true });
+  const { data: premiosRaw } = fidelizacionActiva
+    ? await supabase.from("premios_puntos").select("id,nombre,descripcion,puntos_requeridos,imagen_url,activo,creado_en").eq("restaurante_id", cliente.restaurante_id).eq("activo", true).order("puntos_requeridos", { ascending: true })
+    : { data: [] as any[] };
   const premiosPuntos = ((premiosRaw ?? []) as any[]).map((x) => ({ id: x.id, nombre: x.nombre, descripcion: x.descripcion ?? null, puntos_requeridos: Number(x.puntos_requeridos ?? 0), imagen_url: x.imagen_url ?? null, activo: Boolean(x.activo), creado_en: x.creado_en })) as PremioPuntos[];
 
-  const { data: canjesRaw } = await supabase.from("canjes_puntos").select("id,premio_id,puntos_usados,estado,creado_en,confirmado_en").eq("cliente_id", cliente.id).eq("restaurante_id", cliente.restaurante_id).order("creado_en", { ascending: false });
+  const { data: canjesRaw } = fidelizacionActiva
+    ? await supabase.from("canjes_puntos").select("id,premio_id,puntos_usados,estado,creado_en,confirmado_en").eq("cliente_id", cliente.id).eq("restaurante_id", cliente.restaurante_id).order("creado_en", { ascending: false })
+    : { data: [] as any[] };
   const canjes = ((canjesRaw ?? []) as any[]).map((x) => ({ id: x.id, premio_id: x.premio_id, puntos_usados: Number(x.puntos_usados ?? 0), estado: x.estado, creado_en: x.creado_en, confirmado_en: x.confirmado_en ?? null })) as CanjePuntos[];
   const canjesPendientes = canjes.filter((c) => c.estado === "pendiente");
   const premiosById = new Map(premiosPuntos.map((p) => [p.id, p]));
 
-  const { data: cuponesRaw } = await supabase.from("cupones").select("id,nombre,beneficio,condiciones,activo,creado_en").eq("restaurante_id", cliente.restaurante_id).eq("activo", true).order("creado_en", { ascending: false });
+  const { data: cuponesRaw } = fidelizacionActiva
+    ? await supabase.from("cupones").select("id,nombre,beneficio,condiciones,activo,creado_en").eq("restaurante_id", cliente.restaurante_id).eq("activo", true).order("creado_en", { ascending: false })
+    : { data: [] as any[] };
   const cupones = (cuponesRaw ?? []) as Cupon[];
 
-  const { data: cuponClienteRaw } = await supabase.from("cupon_cliente").select("cupon_id,estado,creado_en,canjeado_en,caduca_en").eq("cliente_id", cliente.id).eq("restaurante_id", cliente.restaurante_id).order("creado_en", { ascending: false });
+  const { data: cuponClienteRaw } = fidelizacionActiva
+    ? await supabase.from("cupon_cliente").select("cupon_id,estado,creado_en,canjeado_en,caduca_en").eq("cliente_id", cliente.id).eq("restaurante_id", cliente.restaurante_id).order("creado_en", { ascending: false })
+    : { data: [] as any[] };
   const cuponEstadoById = new Map<string, { estado: CuponClienteRow["estado"]; fecha: string | null; creado_en: string | null; canjeado_en: string | null; caduca_en: string | null }>();
 
   for (const row of (cuponClienteRaw ?? []) as CuponClienteRow[]) {
@@ -1176,12 +1264,12 @@ export default async function ClientePremiosPage({
   const proximasReservas = reservas.filter((r) => r.fecha_hora_reserva && String(r.estado ?? "").toLowerCase() !== "cancelada" && new Date(r.fecha_hora_reserva).getTime() >= nowMs);
   const historialReservas = reservas.filter((r) => r.fecha_hora_reserva && new Date(r.fecha_hora_reserva).getTime() < nowMs).sort((a, b) => new Date(b.fecha_hora_reserva ?? "").getTime() - new Date(a.fecha_hora_reserva ?? "").getTime());
   const proximaReserva = proximasReservas[0] ?? null;
-  const reservaSeleccionadaCambio = sp.cambiar ? proximasReservas.find((r) => r.id === sp.cambiar) ?? null : null;
+  const reservaSeleccionadaCambio = sp.cambiar ? proximasReservas.find((r) => r.id === sp.cambiar && canCancelReserva(r)) ?? null : null;
   const horaSeleccionadaCambio = String(sp.hora ?? "").trim();
 
   let horasCambio: ReprogramarHorasData | null = null;
 
-  if (reservaSeleccionadaCambio) {
+  if (reservaSeleccionadaCambio && canCancelReserva(reservaSeleccionadaCambio)) {
     try {
       const res = await fetch("https://n8n.gastrohelp.es/webhook/panel-reprogramar-horas", {
         method: "POST",
@@ -1263,7 +1351,18 @@ export default async function ClientePremiosPage({
   return (
     <AppShell accent={accent} bg={bg}>
       <div className="space-y-5">
-        <TopAppHeader restauranteNombre={restoNombre} clienteNombre={String(cliente.nombre ?? "Cliente")} logo={logo} accent={accent} puntos={puntos} donutPct={donutPct} donutTop={donutTop} donutBottom={donutBottom} avisosSinLeer={avisosSinLeer} />
+        <TopAppHeader
+          restauranteNombre={restoNombre}
+          clienteNombre={String(cliente.nombre ?? "Cliente")}
+          logo={logo}
+          accent={accent}
+          puntos={fidelizacionActiva ? puntos : 0}
+          donutPct={fidelizacionActiva ? donutPct : 0}
+          donutTop={fidelizacionActiva ? donutTop : "App cliente"}
+          donutBottom={fidelizacionActiva ? donutBottom : "Gestiona tus reservas y avisos"}
+          avisosSinLeer={avisosSinLeer}
+          fidelizacionActiva={fidelizacionActiva}
+        />
 
         {okText ? <AppNotice type="ok" title={okText.title} text={okText.desc} /> : null}
         {errText ? <AppNotice type="err" title="No se pudo completar" text={errText} dbg={sp.dbg} /> : null}
@@ -1271,9 +1370,9 @@ export default async function ClientePremiosPage({
         {currentTab === "inicio" ? (
           <div className="space-y-5">
             <div className="grid grid-cols-2 gap-3">
-              <StatTile icon={<WalletCards className="h-5 w-5" />} title="Saldo" value={puntos} subtitle={puntosActivo ? `${puntosPorEuro} pts por €` : "Desactivados"} accent={accent} />
+              {fidelizacionActiva ? <StatTile icon={<WalletCards className="h-5 w-5" />} title="Saldo" value={puntos} subtitle={`${puntosPorEuro} pts por €`} accent={accent} /> : null}
               <StatTile icon={<CalendarClock className="h-5 w-5" />} title="Próxima" value={proximaReserva ? formatReservaTime(proximaReserva.fecha_hora_reserva) : "—"} subtitle={proximaReserva ? formatReservaDate(proximaReserva.fecha_hora_reserva) : "Sin reserva"} accent={accent} />
-              <StatTile icon={<TicketPercent className="h-5 w-5" />} title="Cupones" value={promosEspeciales.length} subtitle="Disponibles o programados" accent={accent} />
+              {fidelizacionActiva ? <StatTile icon={<TicketPercent className="h-5 w-5" />} title="Cupones" value={promosEspeciales.length} subtitle="Disponibles o programados" accent={accent} /> : null}
               <StatTile icon={<Bell className="h-5 w-5" />} title="Avisos" value={avisosSinLeer} subtitle="Sin leer" accent={accent} />
             </div>
 
@@ -1281,15 +1380,19 @@ export default async function ClientePremiosPage({
               {!proximaReserva ? (
                 <EmptyState title="Sin visitas programadas" text="Cuando reserves, podrás gestionarla desde aquí." icon={<CalendarDays className="h-6 w-6" />} accent={accent} />
               ) : (
-                <ReservaCard reserva={proximaReserva} accent={accent} token={token} whatsappHref={buildWhatsAppReprogramar(proximaReserva)} canCancel={canCancelReserva(proximaReserva)} cancelarReservaAction={cancelarReservaAction} featured />
+                <ReservaCard reserva={proximaReserva} accent={accent} token={token} whatsappHref={buildWhatsAppReprogramar(proximaReserva)} canCancel={canCancelReserva(proximaReserva)} canChange={canCancelReserva(proximaReserva)} cancelarReservaAction={cancelarReservaAction} featured />
               )}
             </SectionCard>
 
             <SectionCard accent={accent} title="Accesos rápidos" subtitle="Todo lo importante en un toque" icon={<Zap className="h-5 w-5" />}>
               <div className="grid grid-cols-2 gap-3">
                 <a href={buildTabHref("reservas")} className="rounded-[24px] border border-slate-100 bg-white p-4 shadow-sm"><CalendarDays className="h-6 w-6" style={{ color: accent }} /><div className="mt-3 font-black text-slate-950">Reservas</div><div className="text-xs font-semibold text-slate-400">Ver y gestionar</div></a>
-                <a href={buildTabHref("premios")} className="rounded-[24px] border border-slate-100 bg-white p-4 shadow-sm"><Gift className="h-6 w-6" style={{ color: accent }} /><div className="mt-3 font-black text-slate-950">Premios</div><div className="text-xs font-semibold text-slate-400">Canjear puntos</div></a>
-                <a href={buildTabHref("cupones")} className="rounded-[24px] border border-slate-100 bg-white p-4 shadow-sm"><TicketPercent className="h-6 w-6" style={{ color: accent }} /><div className="mt-3 font-black text-slate-950">Cupones</div><div className="text-xs font-semibold text-slate-400">Promos activas</div></a>
+                {fidelizacionActiva ? (
+                  <>
+                    <a href={buildTabHref("premios")} className="rounded-[24px] border border-slate-100 bg-white p-4 shadow-sm"><Gift className="h-6 w-6" style={{ color: accent }} /><div className="mt-3 font-black text-slate-950">Premios</div><div className="text-xs font-semibold text-slate-400">Canjear puntos</div></a>
+                    <a href={buildTabHref("cupones")} className="rounded-[24px] border border-slate-100 bg-white p-4 shadow-sm"><TicketPercent className="h-6 w-6" style={{ color: accent }} /><div className="mt-3 font-black text-slate-950">Cupones</div><div className="text-xs font-semibold text-slate-400">Promos activas</div></a>
+                  </>
+                ) : null}
                 <a href={buildTabHref("perfil")} className="rounded-[24px] border border-slate-100 bg-white p-4 shadow-sm"><User className="h-6 w-6" style={{ color: accent }} /><div className="mt-3 font-black text-slate-950">Perfil</div><div className="text-xs font-semibold text-slate-400">Datos y avisos</div></a>
               </div>
             </SectionCard>
@@ -1322,6 +1425,10 @@ export default async function ClientePremiosPage({
                 {!reservaSeleccionadaCambio ? (
                   <div className="rounded-[24px] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
                     No se encontró esta reserva o ya no se puede modificar.
+                  </div>
+                ) : !canCancelReserva(reservaSeleccionadaCambio) ? (
+                  <div className="rounded-[24px] border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-800">
+                    No puedes cambiar esta reserva desde el panel si faltan menos de 3 horas. Contacta con el restaurante.
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -1426,7 +1533,7 @@ export default async function ClientePremiosPage({
                 <EmptyState title="Sin reservas futuras" text="Tus próximas reservas aparecerán aquí." icon={<CalendarDays className="h-6 w-6" />} accent={accent} />
               ) : (
                 <div className="space-y-3">
-                  {proximasReservas.map((r) => <ReservaCard key={r.id} reserva={r} accent={accent} token={token} whatsappHref={buildWhatsAppReprogramar(r)} canCancel={canCancelReserva(r)} cancelarReservaAction={cancelarReservaAction} />)}
+                  {proximasReservas.map((r) => <ReservaCard key={r.id} reserva={r} accent={accent} token={token} whatsappHref={buildWhatsAppReprogramar(r)} canCancel={canCancelReserva(r)} canChange={canCancelReserva(r)} cancelarReservaAction={cancelarReservaAction} />)}
                 </div>
               )}
             </SectionCard>
@@ -1458,7 +1565,7 @@ export default async function ClientePremiosPage({
           </div>
         ) : null}
 
-        {currentTab === "premios" ? (
+        {currentTab === "premios" && fidelizacionActiva ? (
           <div className="space-y-5">
             <SectionCard accent={accent} title="Premios" subtitle="Puntos, recompensas y validaciones" icon={<Gift className="h-5 w-5" />} right={<Badge accent={accent} variant="solid">{puntos} pts</Badge>}>
               <div className="rounded-[28px] p-5 text-white" style={{ background: `linear-gradient(135deg, ${accent}, #0f172a)` }}>
@@ -1525,7 +1632,7 @@ export default async function ClientePremiosPage({
           </div>
         ) : null}
 
-        {currentTab === "cupones" ? (
+        {currentTab === "cupones" && fidelizacionActiva ? (
           <div className="space-y-5">
             <SectionCard accent={accent} title="Cupones" subtitle="Promos disponibles para ti" icon={<TicketPercent className="h-5 w-5" />} right={<Badge accent={accent}>{promosEspeciales.length}</Badge>}>
               {promosEspeciales.length === 0 ? (
@@ -1613,7 +1720,7 @@ export default async function ClientePremiosPage({
         </div>
       </div>
 
-      <BottomNav currentTab={currentTab} buildTabHref={buildTabHref} avisosSinLeer={avisosSinLeer} accent={accent} />
+      <BottomNav currentTab={currentTab} buildTabHref={buildTabHref} avisosSinLeer={avisosSinLeer} accent={accent} fidelizacionActiva={fidelizacionActiva} />
     </AppShell>
   );
 }
